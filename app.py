@@ -50,16 +50,15 @@ class Login:
             except Exception:
                 st.error("❌ 로그인 실패 - 이메일 또는 비밀번호 확인")
 
-# 회원가입 클래스
 class Register:
     def __init__(self, login_page_url: str):
         st.title("📝 회원가입")
-        email = st.text_input("이메일")
-        password = st.text_input("비밀번호", type="password")
-        nickname = st.text_input("닉네임")
-        phone = st.text_input("휴대전화번호")
+        email = st.text_input("이메일", key="signup_email")
+        password = st.text_input("비밀번호", type="password", key="signup_pw")
+        nickname = st.text_input("닉네임", key="signup_nick")
+        phone = st.text_input("휴대전화번호", key="signup_phone")
 
-        if st.button("회원가입"):
+        if st.button("회원가입", key="signup_btn"):
             try:
                 auth.create_user_with_email_and_password(email, password)
                 db.child("users").child(email.replace(".", "_")).set({
@@ -69,7 +68,7 @@ class Register:
                 })
                 st.success("🎉 회원가입 성공! 로그인 페이지로 이동합니다.")
                 time.sleep(1)
-                st.switch_page(login_page_url)
+                st.rerun()  # 페이지 전환 대신 rerun 사용
 
             except Exception:
                 st.error("❌ 회원가입 실패 - 이메일 중복 여부 확인")

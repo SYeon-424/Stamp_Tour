@@ -122,7 +122,7 @@ elif st.session_state.page == "club_intro":
     club = st.session_state.selected_club
     st.title(f"📘 {club} 부스 소개")
     st.write(f"여기에 **{club}** 동아리에 대한 자세한 소개를 입력하세요.")
-    st.image("club_default.png", caption=f"{club} 활동 사진", use_column_width=True)
+    st.image("club_default.png", caption=f"{club} 활동 사진", use_container_width=True)
 
     # 🔽 여기가 핵심! 버튼 key도 지정해서 충돌 방지
     if st.button("⬅ 도장판으로 돌아가기", key="back_to_main"):

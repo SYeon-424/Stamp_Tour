@@ -89,3 +89,20 @@ class FindPassword:
 
             except:
                 st.error("❌ 이메일 전송 실패")
+
+
+# 화면 출력 제어 (최종 실행 코드)
+if st.session_state.logged_in:
+    st.title("🎯 도장판")
+    st.write(f"닉네임: {st.session_state.nickname}")
+    st.image("static/stampboard.png", width=750)  # 이미지 경로 맞게 수정
+
+    if st.button("로그아웃"):
+        st.session_state.logged_in = False
+        st.rerun()
+else:
+    tab1, tab2 = st.tabs(["로그인", "회원가입"])
+    with tab1:
+        Login()
+    with tab2:
+        Register(login_page_url="")  # 또는 그냥 Register("")

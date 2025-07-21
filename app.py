@@ -146,8 +146,18 @@ def show_stamp_board():
         st.session_state.page = "main"
         st.rerun()
 
-# 동아리 소개
-if st.session_state.page == "club_intro":
+# 화면 렌더링 조건 분기
+if not st.session_state.logged_in:
+    tab1, tab2 = st.tabs(["로그인", "회원가입"])
+    with tab1:
+        Login()
+    with tab2:
+        Register()
+
+elif st.session_state.page == "main":
+    show_stamp_board()
+
+elif st.session_state.page == "club_intro":
     club = st.session_state.selected_club
     st.title(f"📘 {club} 부스 소개")
     st.write(f"여기에 **{club}** 동아리에 대한 자세한 소개를 입력하세요.")
@@ -156,7 +166,6 @@ if st.session_state.page == "club_intro":
         st.session_state.page = "main"
         st.rerun()
 
-# 관리자 로그인
 elif st.session_state.page == "admin_login":
     st.title("🔑 관리자 모드 비밀번호 입력")
     admin_pw = st.text_input("부스용 비밀번호 입력", type="password")
@@ -169,7 +178,6 @@ elif st.session_state.page == "admin_login":
                 st.rerun()
         st.error("❌ 올바르지 않은 비밀번호")
 
-# 관리자 도장찍기
 elif st.session_state.page == "admin_panel":
     st.title(f"✅ {st.session_state.admin_club} 도장 찍기")
     nickname = st.text_input("닉네임 입력")
@@ -187,15 +195,3 @@ elif st.session_state.page == "admin_panel":
         st.session_state.page = "main"
         st.session_state.admin_mode = False
         st.rerun()
-
-# 로그인/회원가입
-elif not st.session_state.logged_in:
-    tab1, tab2 = st.tabs(["로그인", "회원가입"])
-    with tab1:
-        Login()
-    with tab2:
-        Register()
-
-# 로그인 후 도장판
-elif st.session_state.logged_in and st.session_state.page == "main":
-    show_stamp_board()

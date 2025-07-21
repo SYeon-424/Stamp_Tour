@@ -17,6 +17,14 @@ firebase = pyrebase.initialize_app(firebase_config)
 auth = firebase.auth()
 db = firebase.database()
 
+# 부스별 관리자 비밀번호 매핑
+admin_passwords = {
+    "Static": "pw1",
+    "인포메티카": "pw2",
+    "배째미": "pw3",
+    # ... 필요한 만큼 추가 가능
+}
+
 # 세션 초기화
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
@@ -27,6 +35,8 @@ if "page" not in st.session_state:
     st.session_state.page = "main"
 if "selected_club" not in st.session_state:
     st.session_state.selected_club = ""
+if "admin_club" not in st.session_state:
+    st.session_state.admin_club = None
 
 # 로그인 클래스
 class Login:
@@ -55,7 +65,7 @@ class Login:
 
 # 회원가입 클래스
 class Register:
-    def __init__(self, login_page_url: str):
+    def __init__(self):
         st.title("📝 회원가입")
         email = st.text_input("이메일", key="signup_email")
         password = st.text_input("비밀번호", type="password", key="signup_pw")
@@ -76,60 +86,71 @@ class Register:
             except Exception:
                 st.error("❌ 회원가입 실패 - 이메일 중복 여부 확인")
 
-# 관리자 도장 찍기 기능
-def admin_mode():
-    st.title("🛠️ 관리자 모드")
-    club = st.selectbox("도장을 찍을 동아리를 선택하세요", [
-        "Static", "인포메티카", "배째미", "생동감", "셈터", "시그너스", "마스터",
-        "플럭스", "제트온", "오토메틱", "스팀", "넛츠", "케미어스"])
-    nickname = st.text_input("유저 닉네임을 입력하세요")
-    if st.button("도장 찍기"):
-        try:
-            db.child("stamps").child(nickname).update({club: True})
-            st.success(f"✅ {nickname} 님의 {club} 도장을 완료했습니다.")
-        except Exception:
-            st.error("❌ 도장 찍기 실패")
-    if st.button("⬅ 돌아가기"):
+# 관리자 모드 진입
+if st.session_state.logged_in and st.session_state.page == "main":
+    st.title("🎯 도장판")
+    st.write(f"닉네임: {st.session_state.nickname}")
+    st.image("StampPaperSample.png", use_container_width=True)
+
+    st.markdown("---")
+    st.subheader("🔍 동아리 체험 부스")
+
+    clubs = list(admin_passwords.keys())
+    for i, club in enumerate(clubs):
+        if st.button(f"{club} 부스 소개 보기", key=f"club_button_{i}"):
+            st.session_state.page = "club_intro"
+            st.session_state.selected_club = club
+            st.rerun()
+
+        st.markdown("---")
+
+    if st.button("🔑 관리자 모드"):
+        st.session_state.page = "admin_login"
+        st.rerun()
+
+    if st.button("로그아웃"):
+        st.session_state.logged_in = False
         st.session_state.page = "main"
         st.rerun()
 
-# 로그인 상태이고 메인 페이지일 경우
-if st.session_state.logged_in and st.session_state.page == "main":
-    tabs = st.tabs(["도장판", "관리자"])
-
-    with tabs[0]:
-        st.title("🎯 도장판")
-        st.write(f"닉네임: {st.session_state.nickname}")
-        st.image("StampPaperSample.png", use_container_width=True)
-
-        st.markdown("---")
-        st.subheader("🔍 동아리 체험 부스")
-
-        clubs = [
-            "Static", "인포메티카", "배째미", "생동감", "셈터", "시그너스", "마스터",
-            "플럭스", "제트온", "오토메틱", "스팀", "넛츠", "케미어스"]
-
-        for i, club in enumerate(clubs):
-            if st.button(f"{club} 부스 소개 보기", key=f"club_button_{i}"):
-                st.session_state.page = "club_intro"
-                st.session_state.selected_club = club
+# 관리자 비밀번호 입력
+elif st.session_state.page == "admin_login":
+    st.title("🔐 관리자 모드 로그인")
+    pw = st.text_input("부스별 비밀번호를 입력하세요", type="password")
+    if st.button("확인"):
+        found = False
+        for club, password in admin_passwords.items():
+            if pw == password:
+                st.session_state.admin_club = club
+                st.session_state.page = "admin_panel"
+                st.success(f"✅ {club} 관리자 모드 진입 완료!")
+                time.sleep(1)
                 st.rerun()
-            st.markdown("---")
+                found = True
+                break
+        if not found:
+            st.error("❌ 비밀번호가 올바르지 않습니다.")
 
-        if st.button("로그아웃"):
-            st.session_state.logged_in = False
-            st.session_state.page = "main"
-            st.rerun()
-
-    with tabs[1]:
-        st.title("🔐 관리자 로그인")
-        admin_password = st.text_input("관리자 비밀번호", type="password")
-        if st.button("엔터"):
-            if admin_password == "dshs37":
-                st.session_state.page = "admin"
-                st.rerun()
-            else:
-                st.error("❌ 비밀번호가 틀렸습니다.")
+# 관리자 패널
+elif st.session_state.page == "admin_panel" and st.session_state.admin_club:
+    club = st.session_state.admin_club
+    st.title(f"🔧 {club} 부스 도장 찍기")
+    nickname = st.text_input("닉네임 입력")
+    if st.button("✅ 도장 찍기"):
+        all_users = db.child("users").get().val()
+        target_key = None
+        for key, val in all_users.items():
+            if val.get("nickname") == nickname:
+                target_key = key
+                break
+        if target_key:
+            db.child("stamps").child(target_key).update({club: True})
+            st.success(f"🎉 {nickname}님께 {club} 도장을 찍었습니다!")
+        else:
+            st.error("❌ 해당 닉네임을 가진 사용자가 없습니다.")
+    if st.button("⬅ 뒤로 가기"):
+        st.session_state.page = "main"
+        st.rerun()
 
 # 동아리 소개 페이지
 elif st.session_state.page == "club_intro":
@@ -142,14 +163,11 @@ elif st.session_state.page == "club_intro":
         st.session_state.page = "main"
         st.rerun()
 
-# 관리자 페이지
-elif st.session_state.page == "admin":
-    admin_mode()
-
-# 로그인 안 된 경우: 로그인/회원가입 탭 표시
+# 로그인/회원가입 탭
 elif not st.session_state.logged_in:
     tab1, tab2 = st.tabs(["로그인", "회원가입"])
     with tab1:
         Login()
     with tab2:
-        Register(login_page_url="")
+        Register()
+

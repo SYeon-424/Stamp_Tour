@@ -112,10 +112,10 @@ if st.session_state.logged_in and st.session_state.page == "main":
 
         st.markdown("---")
 
-        if st.button("로그아웃"):
-            st.session_state.logged_in = False
-            st.session_state.page = "main"
-            st.rerun()
+    if st.button("로그아웃"):
+        st.session_state.logged_in = False
+        st.session_state.page = "main"
+        st.rerun()
 
 # 동아리 소개 페이지
 elif st.session_state.page == "club_intro":
@@ -124,7 +124,8 @@ elif st.session_state.page == "club_intro":
     st.write(f"여기에 **{club}** 동아리에 대한 자세한 소개를 입력하세요.")
     st.image("club_default.png", caption=f"{club} 활동 사진", use_column_width=True)
 
-    if st.button("⬅ 도장판으로 돌아가기"):
+    # 🔽 여기가 핵심! 버튼 key도 지정해서 충돌 방지
+    if st.button("⬅ 도장판으로 돌아가기", key="back_to_main"):
         st.session_state.page = "main"
         st.rerun()
 

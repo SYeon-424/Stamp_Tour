@@ -39,6 +39,22 @@ club_passwords = {
 
 clubs = list(club_passwords.keys())
 
+club_infos = {
+    "Static": {
+        "description": "Static은 하드웨어와 소프트웨어를 융합한 프로젝트를 진행하는 동아리입니다.",
+        "image": "club_images/static.jpg"
+    },
+    "인포메티카": {
+        "description": "인포메티카는 데이터 분석과 AI를 다루는 정보동아리입니다.",
+        "image": "club_images/infomatica.jpg"
+    },
+    "배째미": {
+        "description": "시현이는 천재야",
+        "image": "club_images/bajjami.jpg"
+    # ... 나머지 부스도 추가
+}
+
+
 # 세션 초기화
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
@@ -166,13 +182,23 @@ elif st.session_state.logged_in and st.session_state.page == "main":
     show_stamp_board()
 
 elif st.session_state.page == "club_intro":
+    elif st.session_state.page == "club_intro":
     club = st.session_state.selected_club
     st.title(f"📘 {club} 부스 소개")
-    st.write(f"여기에 **{club}** 동아리에 대한 자세한 소개를 입력하세요.")
-    st.image("club_default.png", caption=f"{club} 활동 사진", use_container_width=True)
+
+    # club_infos에서 정보 불러오기
+    club_info = club_infos.get(club, {
+        "description": "소개 정보가 없습니다.",
+        "image": "club_default.png"
+    })
+
+    st.write(club_info["description"])
+    st.image(club_info["image"], caption=f"{club} 활동 사진", use_container_width=True)
+
     if st.button("⬅ 도장판으로", key="back_to_main"):
         st.session_state.page = "main"
         st.rerun()
+
 
 elif st.session_state.page == "admin_login":
     st.title("🔑 관리자 모드 비밀번호 입력")

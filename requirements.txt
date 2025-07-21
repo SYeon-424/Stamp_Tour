@@ -2,3 +2,4 @@ streamlit
 pyrebase4
 gcloud
 oauth2client
+setuptools

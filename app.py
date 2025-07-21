@@ -61,12 +61,8 @@ def load_stamp_data():
     try:
         with open(data_file, "r") as f:
             return json.load(f)
-    except json.decoder.JSONDecodeError:
-        # 파일이 비어 있거나 깨졌을 경우 초기화
-        with open(data_file, "w") as f:
-            json.dump({}, f)
+    except json.JSONDecodeError:
         return {}
-
 
 def save_stamp_data(data):
     with open(data_file, "w") as f:
@@ -96,7 +92,6 @@ class Login:
                 st.error("❌ 로그인 실패 - 이메일 또는 비밀번호 확인")
 
 # 회원가입 클래스
-# 회원가입 클래스
 class Register:
     def __init__(self):
         st.title("📝 회원가입")
@@ -112,13 +107,8 @@ class Register:
                     "nickname": nickname,
                     "phone": phone
                 })
-
-                # 🔽 여기에 JSON 저장 추가
-                stamp_data = load_stamp_data()
-                if nickname not in stamp_data:
-                    stamp_data[nickname] = []
-                    save_stamp_data(stamp_data)
-
+                stamp_data[nickname] = []
+                save_stamp_data(stamp_data)
                 st.success("🎉 회원가입 성공!")
                 time.sleep(1)
                 st.rerun()
@@ -130,7 +120,6 @@ def show_stamp_board():
     st.title("🎯 도장판")
     st.write(f"닉네임: {st.session_state.nickname}")
 
-    # 도장 이미지 생성
     base = Image.open("StampPaperSample.png").convert("RGBA")
     overlay = Image.new("RGBA", base.size, (255, 255, 255, 0))
 
@@ -156,12 +145,12 @@ def show_stamp_board():
     st.markdown("---")
     if st.button("관리자 모드"):
         st.session_state.page = "admin_login"
+        st.rerun()
     if st.button("로그아웃"):
         st.session_state.logged_in = False
         st.session_state.page = "main"
         st.rerun()
 
-# 화면 렌더링 조건 분기
 if not st.session_state.logged_in:
     tab1, tab2 = st.tabs(["로그인", "회원가입"])
     with tab1:
@@ -169,7 +158,7 @@ if not st.session_state.logged_in:
     with tab2:
         Register()
 
-elif st.session_state.page == "main":
+elif st.session_state.logged_in and st.session_state.page == "main":
     show_stamp_board()
 
 elif st.session_state.page == "club_intro":
@@ -197,6 +186,7 @@ elif st.session_state.page == "admin_panel":
     st.title(f"✅ {st.session_state.admin_club} 도장 찍기")
     nickname = st.text_input("닉네임 입력")
     if st.button("도장 찍기"):
+        stamp_data = load_stamp_data()
         if nickname not in stamp_data:
             st.error("❌ 존재하지 않는 닉네임입니다.")
         else:

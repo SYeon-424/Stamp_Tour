@@ -147,7 +147,7 @@ def show_stamp_board():
         st.rerun()
 
 # 동아리 소개
-elif st.session_state.page == "club_intro":
+if st.session_state.page == "club_intro":
     club = st.session_state.selected_club
     st.title(f"📘 {club} 부스 소개")
     st.write(f"여기에 **{club}** 동아리에 대한 자세한 소개를 입력하세요.")

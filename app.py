@@ -183,7 +183,6 @@ elif st.session_state.logged_in and st.session_state.page == "main":
     show_stamp_board()
 
 elif st.session_state.page == "club_intro":
-    elif st.session_state.page == "club_intro":
     club = st.session_state.selected_club
     st.title(f"📘 {club} 부스 소개")
 

@@ -173,23 +173,24 @@ elif st.session_state.page == "club_intro":
 
 elif st.session_state.page == "admin_login":
     st.title("🔑 관리자 모드 비밀번호 입력")
-    admin_pw = st.text_input("부스용 비밀번호 입력", type="password")
 
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        if st.button("입장"):
-            for club, pw in club_passwords.items():
-                if admin_pw == pw:
-                    st.session_state.admin_club = club
-                    st.session_state.page = "admin_panel"
-                    st.session_state.admin_mode = True
-                    st.rerun()
-                    st.stop()
-            st.error("❌ 올바르지 않은 비밀번호")
-    with col2:
-        if st.button("⬅ 도장판으로 돌아가기"):
-            st.session_state.page = "main"
-            st.rerun()
+    admin_pw = st.text_input("부스용 비밀번호 입력", type="password")
+    
+    if st.button("입장"):
+        for club, pw in club_passwords.items():
+            if admin_pw == pw:
+                st.session_state.admin_club = club
+                st.session_state.page = "admin_panel"
+                st.session_state.admin_mode = True
+                st.rerun()
+                st.stop()
+        st.error("❌ 올바르지 않은 비밀번호")
+
+    st.markdown("---")
+    if st.button("⬅ 도장판으로 돌아가기"):
+        st.session_state.page = "main"
+        st.rerun()
+
 
 
 elif st.session_state.page == "admin_panel":

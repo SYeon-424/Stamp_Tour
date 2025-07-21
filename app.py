@@ -94,7 +94,7 @@ class FindPassword:
 if st.session_state.logged_in:
     st.title("🎯 도장판")
     st.write(f"닉네임: {st.session_state.nickname}")
-    st.image("static/stampboard.png", width=750)  # 이미지 경로 맞게 수정
+    st.image("StampPaperSample.png", width=750)  # 이미지 경로 맞게 수정
 
     if st.button("로그아웃"):
         st.session_state.logged_in = False

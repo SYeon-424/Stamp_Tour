@@ -86,8 +86,9 @@ class Login:
                     st.session_state.nickname = user_info.get("nickname", "")
                     st.session_state.phone = user_info.get("phone", "")
                 st.success("✅ 로그인 성공!")
-                time.sleep(1)
+                time.sleep(0.5)
                 st.rerun()
+                st.stop()  # 💡 추가: rerun 후 남은 코드 실행 막기
             except:
                 st.error("❌ 로그인 실패 - 이메일 또는 비밀번호 확인")
 

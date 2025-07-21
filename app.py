@@ -102,20 +102,20 @@ if st.session_state.logged_in and st.session_state.page == "main":
     clubs = [
     "Static", "인포메티카", "배째미", "생동감", "셈터", "시그너스", "마스터",
     "플럭스", "제트온", "오토메틱", "스팀", "넛츠", "케미어스"
-]
+    ]
 
-for i, club in enumerate(clubs):
-    if st.button(f"{club} 부스 소개 보기", key=f"club_button_{i}"):
-        st.session_state.page = "club_intro"
-        st.session_state.selected_club = club
-        st.rerun()
+    for i, club in enumerate(clubs):
+        if st.button(f"{club} 부스 소개 보기", key=f"club_button_{i}"):
+            st.session_state.page = "club_intro"
+            st.session_state.selected_club = club
+            st.rerun()
 
-    st.markdown("---")
+        st.markdown("---")
 
-    if st.button("로그아웃"):
-        st.session_state.logged_in = False
-        st.session_state.page = "main"
-        st.rerun()
+        if st.button("로그아웃"):
+            st.session_state.logged_in = False
+            st.session_state.page = "main"
+            st.rerun()
 
 # 동아리 소개 페이지
 elif st.session_state.page == "club_intro":

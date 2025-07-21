@@ -100,15 +100,15 @@ if st.session_state.logged_in and st.session_state.page == "main":
     st.subheader("🔍 동아리 체험 부스")
 
     clubs = [
-        "로보틱스", "인공지능", "바이오", "천문", "화학", "지구과학", "수학연구",
-        "전산", "전기전자", "기계", "물리실험", "에너지", "디자인사이언스"
-    ]
+    "Static", "인포메티카", "배째미", "생동감", "셈터", "시그너스", "마스터",
+    "플럭스", "제트온", "오토메틱", "스팀", "넛츠", "케미어스"
+]
 
-    for club in clubs:
-        if st.button(f"{club} 부스 소개 보기", key=f"club_{club}"):
-            st.session_state.page = "club_intro"
-            st.session_state.selected_club = club
-            st.rerun()
+for i, club in enumerate(clubs):
+    if st.button(f"{club} 부스 소개 보기", key=f"club_button_{i}"):
+        st.session_state.page = "club_intro"
+        st.session_state.selected_club = club
+        st.rerun()
 
     st.markdown("---")
 

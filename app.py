@@ -96,6 +96,7 @@ class Login:
                 st.error("❌ 로그인 실패 - 이메일 또는 비밀번호 확인")
 
 # 회원가입 클래스
+# 회원가입 클래스
 class Register:
     def __init__(self):
         st.title("📝 회원가입")
@@ -111,6 +112,13 @@ class Register:
                     "nickname": nickname,
                     "phone": phone
                 })
+
+                # 🔽 여기에 JSON 저장 추가
+                stamp_data = load_stamp_data()
+                if nickname not in stamp_data:
+                    stamp_data[nickname] = []
+                    save_stamp_data(stamp_data)
+
                 st.success("🎉 회원가입 성공!")
                 time.sleep(1)
                 st.rerun()

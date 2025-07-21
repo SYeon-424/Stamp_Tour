@@ -51,6 +51,7 @@ club_infos = {
     "배째미": {
         "description": "시현이는 천재야",
         "image": "club_images/bajjami.jpg"
+    }
     # ... 나머지 부스도 추가
 }
 

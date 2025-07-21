@@ -121,6 +121,9 @@ def show_stamp_board():
     st.title("🎯 도장판")
     st.write(f"닉네임: {st.session_state.nickname}")
 
+    # 최신 데이터 다시 로드
+    stamp_data = load_stamp_data()
+
     base = Image.open("StampPaperSample.png").convert("RGBA")
     overlay = Image.new("RGBA", base.size, (255, 255, 255, 0))
 

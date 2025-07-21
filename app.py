@@ -58,8 +58,15 @@ def load_stamp_data():
     if not os.path.exists(data_file):
         with open(data_file, "w") as f:
             json.dump({}, f)
-    with open(data_file, "r") as f:
-        return json.load(f)
+    try:
+        with open(data_file, "r") as f:
+            return json.load(f)
+    except json.decoder.JSONDecodeError:
+        # 파일이 비어 있거나 깨졌을 경우 초기화
+        with open(data_file, "w") as f:
+            json.dump({}, f)
+        return {}
+
 
 def save_stamp_data(data):
     with open(data_file, "w") as f:

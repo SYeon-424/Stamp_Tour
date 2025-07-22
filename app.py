@@ -19,6 +19,24 @@ firebase = pyrebase.initialize_app(firebase_config)
 auth = firebase.auth()
 db = firebase.database()
 
+stamp_data = {
+    "name": {
+        "Static": False,
+        "인포메티카": False,
+        "배째미": False,
+        "생동감": False,
+        "셈터": False,
+        "시그너스": False,
+        "마스터": False,
+        "플럭스": False,
+        "제트원": False,
+        "오토메틱": False,
+        "스팀": False,
+        "넛츠": False,
+        "케미어스": False
+    }
+}
+
 # db.child("reservation_status").set({
 #     "Static": False,
 #     "인포메티카": False,
@@ -145,8 +163,11 @@ class Register:
                     "nickname": nickname,
                     "phone": phone
                 })
-                stamp_data[nickname] = []
+        
+                club_status = {club: False for club in clubs}
+                stamp_data[nickname] = club_status
                 save_stamp_data(stamp_data)
+        
                 st.success("✅ 회원가입 성공!")
                 st.rerun()
             except Exception as e:
@@ -161,13 +182,14 @@ def show_stamp_board():
     base = Image.open("StampPaperSample.png").convert("RGBA")
     overlay = Image.new("RGBA", base.size, (255, 255, 255, 0))
 
-    user_stamps = stamp_data.get(st.session_state.nickname, [])
-    for club in user_stamps:
-        try:
-            stamp = Image.open(f"stamps/{club}.png").convert("RGBA")
-            overlay = Image.alpha_composite(overlay, stamp)
-        except:
-            pass
+    user_stamps = stamp_data.get(st.session_state.nickname, {})
+    for club, stamped in user_stamps.items():
+        if stamped:
+            try:
+                stamp = Image.open(f"stamps/{club}.png").convert("RGBA")
+                overlay = Image.alpha_composite(overlay, stamp)
+            except:
+                pass
 
     result = Image.alpha_composite(base, overlay)
     st.image(result, use_container_width=True)

@@ -42,15 +42,15 @@ clubs = list(club_passwords.keys())
 club_infos = {
     "Static": {
         "description": "Static은 하드웨어와 소프트웨어를 융합한 프로젝트를 진행하는 동아리입니다.",
-        "image": "club_images/static.jpg"
+        "image": "club_images/static.png"
     },
     "인포메티카": {
         "description": "인포메티카는 데이터 분석과 AI를 다루는 정보동아리입니다.",
-        "image": "club_images/infomatica.jpg"
+        "image": "club_images/infomatica.png"
     },
     "배째미": {
         "description": "시현이는 천재야",
-        "image": "club_images/bajjami.jpg"
+        "image": "club_images/bajjami.png"
     }
     # ... 나머지 부스도 추가
 }

@@ -63,6 +63,30 @@ if "logged_in" not in st.session_state:
     st.session_state.admin_mode = False
 
 data_file = "stamp_data.json"
+reservation_status_file = "reservation_status.json"
+reservation_data_file = "reservations.json"
+
+def load_reservation_status():
+    if not os.path.exists(reservation_status_file):
+        with open(reservation_status_file, "w") as f:
+            json.dump({}, f)
+    with open(reservation_status_file, "r") as f:
+        return json.load(f)
+
+def save_reservation_status(data):
+    with open(reservation_status_file, "w") as f:
+        json.dump(data, f, indent=2)
+
+def load_reservations():
+    if not os.path.exists(reservation_data_file):
+        with open(reservation_data_file, "w") as f:
+            json.dump({}, f)
+    with open(reservation_data_file, "r") as f:
+        return json.load(f)
+
+def save_reservations(data):
+    with open(reservation_data_file, "w") as f:
+        json.dump(data, f, indent=2)
 
 def load_stamp_data():
     if not os.path.exists(data_file):

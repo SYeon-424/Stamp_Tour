@@ -217,6 +217,7 @@ elif st.session_state.page == "reservation_page":
 
     st.markdown("#### 📋 예약 현황")
     if club_reservations:
+        sorted_reservations = sorted(club_reservations, key=lambda r: r["time"])
         st.table([{"시간": r["time"], "닉네임": r["nickname"]} for r in club_reservations])
     else:
         st.info("아직 예약된 인원이 없습니다.")
@@ -333,6 +334,7 @@ elif st.session_state.page == "admin_panel":
             if not club_reservations:
                 st.info("예약된 항목이 없습니다.")
             else:
+                sorted_admin_reservations = sorted(club_reservations, key=lambda r: r["time"])
                 st.table([{ "시간": r["time"], "닉네임": r["nickname"], "전화번호": r["phone"] } for r in club_reservations])
 
     if st.button("🔙 메인으로"):

@@ -8,6 +8,7 @@ from PIL import Image
 firebase_config = {
   apiKey: "AIzaSyAnQEAGW1Of4_H1GqDU0YLum5BPHCA4o6s",
   authDomain: "stamp-tour-syeon02424.firebaseapp.com",
+  databaseURL: "https://console.firebase.google.com/u/2/project/stamp-tour-syeon02424/database/stamp-tour-syeon02424-default-rtdb/data/~2F",
   projectId: "stamp-tour-syeon02424",
   storageBucket: "stamp-tour-syeon02424.firebasestorage.app",
   messagingSenderId: "243251650008",

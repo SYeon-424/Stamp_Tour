@@ -19,7 +19,9 @@ firebase = pyrebase.initialize_app(firebase_config)
 auth = firebase.auth()
 db = firebase.database()
 
-db.child("stamp_data").set({})
+if db.child("stamp_data").get().val() is None:
+    db.child("stamp_data").set({})
+    
 db.child("reservation_status").set({
     "Static": False,
     "인포메티카": False,

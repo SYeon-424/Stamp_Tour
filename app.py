@@ -243,6 +243,58 @@ elif st.session_state.page == "admin_login":
         st.session_state.page = "main"
         st.rerun()
 
+elif st.session_state.page == "reservation_page":
+    club = st.session_state.selected_club
+    st.title(f"📅 {club} 예약")
+
+    reservations = load_reservations()
+    club_reservations = reservations.get(club, [])
+    nickname = st.session_state.nickname
+    phone = st.session_state.phone
+
+    existing = next((r for r in club_reservations if r["nickname"] == nickname), None)
+
+    st.markdown("#### 📋 예약 현황")
+    if club_reservations:
+        st.table([
+            {"시간": r["time"], "닉네임": r["nickname"]}
+            for r in club_reservations
+        ])
+    else:
+        st.info("아직 예약된 인원이 없습니다.")
+
+    st.markdown("---")
+
+    if existing:
+        st.info(f"⏰ 이미 예약되어 있습니다: {existing['time']}")
+        if st.button("❌ 예약 취소"):
+            club_reservations.remove(existing)
+            reservations[club] = club_reservations
+            save_reservations(reservations)
+            st.success("예약이 취소되었습니다.")
+            time.sleep(1)
+            st.rerun()
+    else:
+        st.markdown("#### 🔽 예약 시간 선택")
+        selected_time = st.selectbox("시간 선택", [
+            "10:00", "10:30", "11:00", "11:30",
+            "13:00", "13:30", "14:00", "14:30"
+        ])
+
+        if st.button("✅ 예약"):
+            new_entry = {"time": selected_time, "nickname": nickname, "phone": phone}
+            club_reservations.append(new_entry)
+            reservations[club] = club_reservations
+            save_reservations(reservations)
+            st.success("예약이 완료되었습니다!")
+            time.sleep(1)
+            st.rerun()
+
+    st.markdown("---")
+    if st.button("🔙 뒤로 가기"):
+        st.session_state.page = "main"
+        st.rerun()
+
 elif st.session_state.page == "admin_panel":
     st.title(f"✅ {st.session_state.admin_club} 관리자 페이지")
     tab1, tab2 = st.tabs(["📌 도장 찍기", "📅 예약 관리"])

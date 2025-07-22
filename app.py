@@ -98,11 +98,11 @@ def save_reservations(data):
     db.child("reservations").set(data)
 
 def load_stamp_data():
-    data = db.child("stamp_data").get().val()
+    data = db.child("users").get().val()
     return data if data else {}
 
 def save_stamp_data(data):
-    db.child("stamp_data").set(data)
+    db.child("users").set(data)
   
 stamp_data = load_stamp_data()
 

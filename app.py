@@ -194,7 +194,7 @@ def show_stamp_board():
 
 if st.session_state.page == "club_intro":
     club = st.session_state.selected_club
-    st.title(f"📑 {club} 부스 소개")
+    st.title(f"📑 {club}")
     club_info = club_infos.get(club, {"description": "소개 정보가 없습니다.", "image": "club_default.png"})
     st.write(club_info["description"])
     st.image(club_info["image"], caption=f"{club} 활동 소개", use_container_width=True)
@@ -255,7 +255,7 @@ elif st.session_state.page == "reservation_page":
         st.rerun()
 
 elif st.session_state.page == "admin_login":
-    st.title("🔑 인증")
+    st.title("🗝️ 인증")
     admin_pw = st.text_input("비밀번호 입력", type="password")
     if st.button("Enter"):
         for club, pw in club_passwords.items():

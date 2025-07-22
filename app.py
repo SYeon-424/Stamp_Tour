@@ -5,7 +5,6 @@ import json
 import os
 from PIL import Image
 
-# Firebase 설정
 firebase_config = {
     "apiKey": "AIzaSyCswFmrOGU3FyLYxwbNPTp7hvQxLfTPIZw",
     "authDomain": "sw-projects-49798.firebaseapp.com",
@@ -20,7 +19,6 @@ firebase = pyrebase.initialize_app(firebase_config)
 auth = firebase.auth()
 db = firebase.database()
 
-# 부스 목록과 비밀번호
 club_passwords = {
     "Static": "pw1",
     "인포메티카": "pw2",
@@ -30,7 +28,7 @@ club_passwords = {
     "시그너스": "pw6",
     "마스터": "pw7",
     "플럭스": "pw8",
-    "제트온": "pw9",
+    "제트원": "pw9",
     "오토메틱": "pw10",
     "스팀": "pw11",
     "넛츠": "pw12",
@@ -41,22 +39,19 @@ clubs = list(club_passwords.keys())
 
 club_infos = {
     "Static": {
-        "description": "Static은 하드웨어와 소프트웨어를 융합한 프로젝트를 진행하는 동아리입니다.",
+        "description": "Static 소개... 유지원은 일해라아!!",
         "image": "club_images/Static.png"
     },
     "인포메티카": {
-        "description": "인포메티카는 데이터 분석과 AI를 다루는 정보동아리입니다.",
+        "description": "인포메티카 소개",
         "image": "club_images/infomatica.png"
     },
     "배째미": {
         "description": "시현이는 천재야",
         "image": "club_images/bajjami.png"
     }
-    # ... 나머지 부스도 추가
 }
 
-
-# 세션 초기화
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
     st.session_state.user_email = ""
@@ -67,10 +62,8 @@ if "logged_in" not in st.session_state:
     st.session_state.admin_club = None
     st.session_state.admin_mode = False
 
-# JSON 파일 경로
 data_file = "stamp_data.json"
 
-# JSON 초기화 함수
 def load_stamp_data():
     if not os.path.exists(data_file):
         with open(data_file, "w") as f:
@@ -87,7 +80,6 @@ def save_stamp_data(data):
 
 stamp_data = load_stamp_data()
 
-# 로그인 클래스
 class Login:
     def __init__(self):
         st.title("🔐 로그인")
@@ -105,11 +97,10 @@ class Login:
                 st.success("✅ 로그인 성공!")
                 time.sleep(0.5)
                 st.rerun()
-                st.stop()  # 💡 추가: rerun 후 남은 코드 실행 막기
+                st.stop() 
             except:
                 st.error("❌ 로그인 실패 - 이메일 또는 비밀번호 확인")
 
-# 회원가입 클래스
 class Register:
     def __init__(self):
         st.title("📝 회원가입")
@@ -127,18 +118,16 @@ class Register:
                 })
                 stamp_data[nickname] = []
                 save_stamp_data(stamp_data)
-                st.success("🎉 회원가입 성공!")
+                st.success("✅ 회원가입 성공!")
                 time.sleep(1)
                 st.rerun()
             except:
                 st.error("❌ 회원가입 실패 - 이메일 중복 여부 확인")
 
-# 도장판 페이지
 def show_stamp_board():
     st.title("🎯 도장판")
     st.write(f"닉네임: {st.session_state.nickname}")
 
-    # 최신 데이터 다시 로드
     stamp_data = load_stamp_data()
 
     base = Image.open("StampPaperSample.png").convert("RGBA")
@@ -156,15 +145,15 @@ def show_stamp_board():
     st.image(result, use_container_width=True)
 
     st.markdown("---")
-    st.subheader("🔍 동아리 체험 부스")
+    st.subheader("🔬 체험 부스")
     for i, club in enumerate(clubs):
-        if st.button(f"{club} 부스 소개 보기", key=f"club_button_{i}"):
+        if st.button(f"{club} 부스 소개", key=f"club_button_{i}"):
             st.session_state.page = "club_intro"
             st.session_state.selected_club = club
             st.rerun()
 
     st.markdown("---")
-    if st.button("관리자 모드"):
+    if st.button("Staff only"):
         st.session_state.page = "admin_login"
         st.rerun()
     if st.button("로그아웃"):
@@ -184,9 +173,8 @@ elif st.session_state.logged_in and st.session_state.page == "main":
 
 elif st.session_state.page == "club_intro":
     club = st.session_state.selected_club
-    st.title(f"📘 {club} 부스 소개")
+    st.title(f"📑 {club} 부스 소개")
 
-    # club_infos에서 정보 불러오기
     club_info = club_infos.get(club, {
         "description": "소개 정보가 없습니다.",
         "image": "club_default.png"
@@ -195,17 +183,17 @@ elif st.session_state.page == "club_intro":
     st.write(club_info["description"])
     st.image(club_info["image"], caption=f"{club} 활동 사진", use_container_width=True)
 
-    if st.button("⬅ 도장판으로", key="back_to_main"):
+    if st.button("🔙 메인으로", key="back_to_main"):
         st.session_state.page = "main"
         st.rerun()
 
 
 elif st.session_state.page == "admin_login":
-    st.title("🔑 관리자 모드 비밀번호 입력")
+    st.title("🔑 인증")
 
-    admin_pw = st.text_input("부스용 비밀번호 입력", type="password")
+    admin_pw = st.text_input("비밀번호 입력", type="password")
     
-    if st.button("입장"):
+    if st.button("Enter"):
         for club, pw in club_passwords.items():
             if admin_pw == pw:
                 st.session_state.admin_club = club
@@ -213,17 +201,15 @@ elif st.session_state.page == "admin_login":
                 st.session_state.admin_mode = True
                 st.rerun()
                 st.stop()
-        st.error("❌ 올바르지 않은 비밀번호")
+        st.error("❌ 잘못된 비밀번호입니다.")
 
     st.markdown("---")
-    if st.button("⬅ 도장판으로 돌아가기"):
+    if st.button("🔙 메인으로"):
         st.session_state.page = "main"
         st.rerun()
 
-
-
 elif st.session_state.page == "admin_panel":
-    st.title(f"✅ {st.session_state.admin_club} 도장 찍기")
+    st.title(f"✅ {st.session_state.admin_club}")
     nickname = st.text_input("닉네임 입력")
     if st.button("도장 찍기"):
         stamp_data = load_stamp_data()
@@ -233,10 +219,10 @@ elif st.session_state.page == "admin_panel":
             if st.session_state.admin_club not in stamp_data[nickname]:
                 stamp_data[nickname].append(st.session_state.admin_club)
                 save_stamp_data(stamp_data)
-                st.success("📌 도장 찍기 성공!")
+                st.success("📌 도장을 찍었습니다!")
             else:
-                st.info("✅ 이미 도장이 찍혀 있습니다.")
-    if st.button("⬅ 도장판으로 돌아가기"):
+                st.info("❌ 이미 도장이 찍혀 있습니다.")
+    if st.button("🔙 메인으로"):
         st.session_state.page = "main"
         st.session_state.admin_mode = False
         st.rerun()

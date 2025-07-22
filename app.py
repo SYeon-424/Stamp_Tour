@@ -19,25 +19,21 @@ firebase = pyrebase.initialize_app(firebase_config)
 auth = firebase.auth()
 db = firebase.database()
 
-db.child("stamp_data").set({})
-    
-db.child("reservation_status").set({
-    "Static": False,
-    "인포메티카": False,
-    "배째미": False,
-    "생동감": False,
-    "셈터": False,
-    "시그너스": False,
-    "마스터": False,
-    "플럭스": False,
-    "제트원": False,
-    "오토메틱": False,
-    "스팀": False,
-    "넛츠": False,
-    "케미어스": False
-})
-db.child("reservations").set({})
-
+# db.child("reservation_status").set({
+#     "Static": False,
+#     "인포메티카": False,
+#     "배째미": False,
+#     "생동감": False,
+#     "셈터": False,
+#     "시그너스": False,
+#     "마스터": False,
+#     "플럭스": False,
+#     "제트원": False,
+#     "오토메틱": False,
+#     "스팀": False,
+#     "넛츠": False,
+#     "케미어스": False
+# })
 
 club_passwords = { #비밀번호 설정하는곳_부스순서대로 고쳐서 비번 바꾸기
     "Static": "pw1",

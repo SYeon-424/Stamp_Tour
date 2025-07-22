@@ -48,6 +48,8 @@ if "logged_in" not in st.session_state:
 
 # DB 초기화 함수
 
+
+
 def initialize_firebase_data():
     if not db.child("reservation_status").get().val():
         db.child("reservation_status").set({club: False for club in clubs})
@@ -64,6 +66,58 @@ def save_data(path, data):
 initialize_firebase_data()
 
 # 이하 생략 없이 이어지는 전체 코드로 구성 완료됨. 위와 이어서 실행하면 됩니다.
+
+class Login:
+    def __init__(self):
+        st.title("🔐 로그인")
+        email = st.text_input("이메일")
+        password = st.text_input("비밀번호", type="password")
+        if st.button("로그인"):
+            try:
+                auth.sign_in_with_email_and_password(email, password)
+                st.session_state.logged_in = True
+                st.session_state.user_email = email
+                user_info = db.child("users").child(email.replace(".", "_")).get().val()
+                if user_info:
+                    st.session_state.nickname = user_info.get("nickname", "")
+                    st.session_state.phone = user_info.get("phone", "")
+                st.success("✅ 로그인 성공!")
+                st.rerun()
+            except:
+                st.error("❌ 로그인 실패 - 이메일 또는 비밀번호 확인")
+
+
+class Register:
+    def __init__(self):
+        st.title("📝 회원가입")
+        email = st.text_input("이메일", key="signup_email")
+        password = st.text_input("비밀번호", type="password", key="signup_pw")
+        nickname = st.text_input("닉네임", key="signup_nick")
+
+        if any(c in nickname for c in ".#$[]/ ") or nickname.strip() == "":
+            st.error("❌ 닉네임에 공백이나 '.', '#', '$', '[', ']', '/' 는 사용할 수 없습니다.")
+            st.stop()
+
+        phone = st.text_input("휴대전화번호", key="signup_phone")
+        if st.button("회원가입"):
+            stamp_data = load_data("stamp_data")
+            if nickname in stamp_data:
+                st.error("❌ 이미 존재하는 닉네임입니다.")
+                return
+            try:
+                auth.create_user_with_email_and_password(email, password)
+                db.child("users").child(email.replace(".", "_")).set({
+                    "email": email,
+                    "nickname": nickname,
+                    "phone": phone
+                })
+                club_status = {club: False for club in clubs}
+                stamp_data[nickname] = club_status
+                save_data("stamp_data", stamp_data)
+                st.success("✅ 회원가입 성공!")
+                st.rerun()
+            except Exception as e:
+                st.error(f"❌ 회원가입 실패: {e}")
 
 
 def show_stamp_board():

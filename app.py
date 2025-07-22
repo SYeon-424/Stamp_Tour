@@ -234,6 +234,11 @@ elif st.session_state.page == "reservation_page":
             st.rerun()
     else:
         st.markdown("#### 🔽 예약 시간 선택")
+        
+        max_reservations = load_data("max_reservations")
+        limit = max_reservations.get(club, 2)
+        st.markdown(f"**최대 {limit}명까지 예약할 수 있습니다.**")
+        
         selected_time = st.selectbox("시간 선택", [
             "10:00", "10:30", "11:00", "11:30",
             "13:00", "13:30", "14:00", "14:30"

@@ -8,7 +8,7 @@ from PIL import Image
 firebase_config = {
     "apiKey": "AIzaSyAnQEAGW1Of4_H1GqDU0YLum5BPHCA4o6s",
     "authDomain": "stamp-tour-syeon02424.firebaseapp.com",
-    "databaseURL": "https://stamp-tour-syeon02424-default-rtdb.firebaseio.com",
+    "databaseURL": "https://stamp-tour-syeon02424-default-rtdb.asia-southeast1.firebasedatabase.app",  # ✅ 수정!
     "projectId": "stamp-tour-syeon02424",
     "storageBucket": "stamp-tour-syeon02424.appspot.com",
     "messagingSenderId": "243251650008",

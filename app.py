@@ -109,6 +109,10 @@ class Register:
         nickname = st.text_input("닉네임", key="signup_nick")
         phone = st.text_input("휴대전화번호", key="signup_phone")
         if st.button("회원가입"):
+            stamp_data = load_stamp_data()
+            if nickname in stamp_data:
+                st.error("❌ 이미 존재하는 닉네임입니다.")
+                return
             try:
                 auth.create_user_with_email_and_password(email, password)
                 db.child("users").child(email.replace(".", "_")).set({

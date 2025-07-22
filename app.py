@@ -211,6 +211,12 @@ elif st.session_state.page == "club_intro":
     st.write(club_info["description"])
     st.image(club_info["image"], caption=f"{club} 활동 소개", use_container_width=True)
 
+    reservation_status = load_reservation_status()
+    if reservation_status.get(club, False):
+        if st.button("📅 예약하기", key="reserve_button"):
+            st.session_state.page = "reservation_page"
+            st.rerun()
+    
     if st.button("🔙 메인으로", key="back_to_main"):
         st.session_state.page = "main"
         st.rerun()

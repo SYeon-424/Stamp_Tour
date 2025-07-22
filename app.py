@@ -81,10 +81,6 @@ if "logged_in" not in st.session_state:
     st.session_state.admin_club = None
     st.session_state.admin_mode = False
 
-data_file = "stamp_data.json"
-reservation_status_file = "reservation_status.json"
-reservation_data_file = "reservations.json"
-
 def load_reservation_status():
     data = db.child("reservation_status").get().val()
     return data if data else {}

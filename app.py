@@ -48,13 +48,21 @@ if "logged_in" not in st.session_state:
 
 # DB 초기화 함수
 
-
-
 def initialize_firebase_data():
     if not db.child("reservation_status").get().val():
         db.child("reservation_status").set({club: False for club in clubs})
     if not db.child("stamp_data").get().val():
         db.child("stamp_data").set({})
+
+    # 강제 초기화: stamp_data가 아예 없을 경우 Firebase에 빈 딕셔너리 저장
+    try:
+        existing = db.child("stamp_data").get().val()
+        if existing is None:
+            db.child("stamp_data").set({})
+    except Exception as e:
+        st.error(f"🔥 stamp_data 초기화 중 오류 발생: {e}")
+
+initialize_firebase_data()
 
 def load_data(path):
     data = db.child(path).get().val()

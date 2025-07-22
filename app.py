@@ -237,19 +237,46 @@ elif st.session_state.page == "admin_login":
         st.rerun()
 
 elif st.session_state.page == "admin_panel":
-    st.title(f"✅ {st.session_state.admin_club}")
-    nickname = st.text_input("닉네임 입력")
-    if st.button("도장 찍기"):
-        stamp_data = load_stamp_data()
-        if nickname not in stamp_data:
-            st.error("❌ 존재하지 않는 닉네임입니다.")
-        else:
-            if st.session_state.admin_club not in stamp_data[nickname]:
-                stamp_data[nickname].append(st.session_state.admin_club)
-                save_stamp_data(stamp_data)
-                st.success("📌 도장을 찍었습니다!")
+    st.title(f"✅ {st.session_state.admin_club} 관리자 페이지")
+    tab1, tab2 = st.tabs(["📌 도장 찍기", "📅 예약 관리"])
+
+    with tab1:
+        nickname = st.text_input("닉네임 입력")
+        if st.button("도장 찍기"):
+            stamp_data = load_stamp_data()
+            if nickname not in stamp_data:
+                st.error("❌ 존재하지 않는 닉네임입니다.")
             else:
-                st.info("❌ 이미 도장이 찍혀 있습니다.")
+                if st.session_state.admin_club not in stamp_data[nickname]:
+                    stamp_data[nickname].append(st.session_state.admin_club)
+                    save_stamp_data(stamp_data)
+                    st.success("📌 도장을 찍었습니다!")
+                else:
+                    st.info("❌ 이미 도장이 찍혀 있습니다.")
+
+    with tab2:
+        reservation_status = load_reservation_status()
+        reservations = load_reservations()
+        club = st.session_state.admin_club
+
+        is_enabled = reservation_status.get(club, False)
+        new_status = st.checkbox("예약 기능 활성화", value=is_enabled)
+        if new_status != is_enabled:
+            reservation_status[club] = new_status
+            save_reservation_status(reservation_status)
+            st.success(f"예약 기능이 {'활성화' if new_status else '비활성화'}되었습니다.")
+
+        if reservation_status.get(club, False):
+            st.markdown("#### 📋 예약 목록")
+            club_reservations = reservations.get(club, [])
+            if not club_reservations:
+                st.info("예약된 항목이 없습니다.")
+            else:
+                st.table([
+                    {"시간": r["time"], "닉네임": r["nickname"], "전화번호": r["phone"]}
+                    for r in club_reservations
+                ])
+
     if st.button("🔙 메인으로"):
         st.session_state.page = "main"
         st.session_state.admin_mode = False

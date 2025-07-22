@@ -4,7 +4,6 @@ import time
 import os
 from PIL import Image
 
-# Firebase 설정
 firebase_config = {
     "apiKey": "AIzaSyAnQEAGW1Of4_H1GqDU0YLum5BPHCA4o6s",
     "authDomain": "stamp-tour-syeon02424.firebaseapp.com",
@@ -19,21 +18,29 @@ firebase = pyrebase.initialize_app(firebase_config)
 auth = firebase.auth()
 db = firebase.database()
 
-# 부스 정보 및 설정
 club_passwords = {
-    "Static": "pw1", "인포메티카": "pw2", "배째미": "pw3", "생동감": "pw4",
-    "셈터": "pw5", "시그너스": "pw6", "마스터": "pw7", "플럭스": "pw8",
-    "제트원": "pw9", "오토메틱": "pw10", "스팀": "pw11", "넛츠": "pw12", "케미어스": "pw13"
+    "Static": "pw1", 
+    "인포메티카": "pw2",
+    "배째미": "pw3", 
+    "생동감": "pw4",
+    "셈터": "pw5", 
+    "시그너스": "pw6", 
+    "마스터": "pw7", 
+    "플럭스": "pw8",
+    "제트원": "pw9", 
+    "오토메틱": "pw10", 
+    "스팀": "pw11", 
+    "넛츠": "pw12", 
+    "케미어스": "pw13"
 }
 clubs = list(club_passwords.keys())
 
 club_infos = {
-    "Static": {"description": "Static 소개...", "image": "club_images/Static.png"},
+    "Static": {"description": "Static 소개... 유지원은 일해라아!!", "image": "club_images/Static.png"},
     "인포메티카": {"description": "인포메티카 소개", "image": "club_images/infomatica.png"},
     "배째미": {"description": "시현이는 천재야", "image": "club_images/bajjami.png"}
 }
 
-# 세션 초기화
 if "logged_in" not in st.session_state:
     st.session_state.update({
         "logged_in": False,
@@ -46,15 +53,12 @@ if "logged_in" not in st.session_state:
         "admin_mode": False
     })
 
-# DB 초기화 함수
-
 def initialize_firebase_data():
     if not db.child("reservation_status").get().val():
         db.child("reservation_status").set({club: False for club in clubs})
     if not db.child("stamp_data").get().val():
         db.child("stamp_data").set({})
-
-    # 강제 초기화: stamp_data가 아예 없을 경우 Firebase에 빈 딕셔너리 저장
+        
     try:
         existing = db.child("stamp_data").get().val()
         if existing is None:
@@ -72,8 +76,6 @@ def save_data(path, data):
     db.child(path).set(data)
 
 initialize_firebase_data()
-
-# 이하 생략 없이 이어지는 전체 코드로 구성 완료됨. 위와 이어서 실행하면 됩니다.
 
 class Login:
     def __init__(self):
@@ -93,7 +95,6 @@ class Login:
                 st.rerun()
             except:
                 st.error("❌ 로그인 실패 - 이메일 또는 비밀번호 확인")
-
 
 class Register:
     def __init__(self):
@@ -183,7 +184,6 @@ def show_stamp_board():
         st.session_state.page = "main"
         st.rerun()
 
-# 부스 소개
 if st.session_state.page == "club_intro":
     club = st.session_state.selected_club
     st.title(f"📑 {club} 부스 소개")
@@ -194,7 +194,6 @@ if st.session_state.page == "club_intro":
         st.session_state.page = "main"
         st.rerun()
 
-# 예약 페이지
 elif st.session_state.page == "reservation_page":
     club = st.session_state.selected_club
     st.title(f"📅 {club} 예약")
@@ -247,7 +246,6 @@ elif st.session_state.page == "reservation_page":
         st.session_state.page = "main"
         st.rerun()
 
-# 관리자 로그인
 elif st.session_state.page == "admin_login":
     st.title("🔑 인증")
     admin_pw = st.text_input("비밀번호 입력", type="password")
@@ -264,7 +262,6 @@ elif st.session_state.page == "admin_login":
         st.session_state.page = "main"
         st.rerun()
 
-# 관리자 페이지
 elif st.session_state.page == "admin_panel":
     st.title(f"✅ {st.session_state.admin_club} 관리자 페이지")
     tab1, tab2 = st.tabs(["📌 도장 찍기", "📅 예약 관리"])
@@ -281,7 +278,7 @@ elif st.session_state.page == "admin_panel":
                     save_data("stamp_data", stamp_data)
                     st.success("📌 도장을 찍었습니다!")
                 else:
-                    st.info("✅ 이미 도장이 찍혀 있습니다.")
+                    st.info("❌ 이미 도장이 찍혀 있습니다.")
 
     with tab2:
         reservation_status = load_data("reservation_status")
@@ -307,7 +304,6 @@ elif st.session_state.page == "admin_panel":
         st.session_state.admin_mode = False
         st.rerun()
 
-# 진입점
 if not st.session_state.logged_in:
     tab1, tab2 = st.tabs(["로그인", "회원가입"])
     with tab1:

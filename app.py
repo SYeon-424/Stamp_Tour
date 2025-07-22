@@ -1,184 +1,13 @@
-import streamlit as st
-import pyrebase
-import time
-import json
-import os
-from PIL import Image
+...
 
-firebase_config = {
-    "apiKey": "AIzaSyAnQEAGW1Of4_H1GqDU0YLum5BPHCA4o6s",
-    "authDomain": "stamp-tour-syeon02424.firebaseapp.com",
-    "databaseURL": "https://stamp-tour-syeon02424-default-rtdb.asia-southeast1.firebasedatabase.app",
-    "projectId": "stamp-tour-syeon02424",
-    "storageBucket": "stamp-tour-syeon02424.appspot.com",
-    "messagingSenderId": "243251650008",
-    "appId": "1:243251650008:web:d37c89919c821a7bcae6ad"
-}
+# (위 코드는 생략된 상태이며 이어지는 파트입니다)
 
-firebase = pyrebase.initialize_app(firebase_config)
-auth = firebase.auth()
-db = firebase.database()
-
-stamp_data = {
-    "name": {
-        "Static": False,
-        "인포메티카": False,
-        "배째미": False,
-        "생동감": False,
-        "셈터": False,
-        "시그너스": False,
-        "마스터": False,
-        "플럭스": False,
-        "제트원": False,
-        "오토메틱": False,
-        "스팀": False,
-        "넛츠": False,
-        "케미어스": False
-    }
-}
-
-# db.child("reservation_status").set({
-#     "Static": False,
-#     "인포메티카": False,
-#     "배째미": False,
-#     "생동감": False,
-#     "셈터": False,
-#     "시그너스": False,
-#     "마스터": False,
-#     "플럭스": False,
-#     "제트원": False,
-#     "오토메틱": False,
-#     "스팀": False,
-#     "넛츠": False,
-#     "케미어스": False
-# })
-
-club_passwords = { #비밀번호 설정하는곳_부스순서대로 고쳐서 비번 바꾸기
-    "Static": "pw1",
-    "인포메티카": "pw2",
-    "배째미": "pw3",
-    "생동감": "pw4",
-    "셈터": "pw5",
-    "시그너스": "pw6",
-    "마스터": "pw7",
-    "플럭스": "pw8",
-    "제트원": "pw9",
-    "오토메틱": "pw10",
-    "스팀": "pw11",
-    "넛츠": "pw12",
-    "케미어스": "pw13"
-}
-
-clubs = list(club_passwords.keys())
-
-club_infos = { #_부스소개는 여기서 넣고, 이미지는 club_images 폴더에 png 파일로
-    "Static": {
-        "description": "Static 소개... 유지원은 일해라아!!",
-        "image": "club_images/Static.png"
-    },
-    "인포메티카": {
-        "description": "인포메티카 소개",
-        "image": "club_images/infomatica.png"
-    },
-    "배째미": {
-        "description": "시현이는 천재야",
-        "image": "club_images/bajjami.png"
-    }
-}
-
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-    st.session_state.user_email = ""
-    st.session_state.nickname = ""
-    st.session_state.phone = ""
-    st.session_state.page = "main"
-    st.session_state.selected_club = ""
-    st.session_state.admin_club = None
-    st.session_state.admin_mode = False
-
-def load_reservation_status():
-    data = db.child("reservation_status").get().val()
-    return data if data else {}
-
-def save_reservation_status(data):
-    db.child("reservation_status").set(data)
-
-def load_reservations():
-    data = db.child("reservations").get().val()
-    return data if data else {}
-
-def save_reservations(data):
-    db.child("reservations").set(data)
-
-def load_stamp_data():
-    data = db.child("stamp_data").get().val()
-    return data if data else {}
-
-def save_stamp_data(data):
-    db.child("stamp_data").set(data)
-  
-stamp_data = load_stamp_data()
-
-class Login:
-    def __init__(self):
-        st.title("🔐 로그인")
-        email = st.text_input("이메일")
-        password = st.text_input("비밀번호", type="password")
-        if st.button("로그인"):
-            try:
-                user = auth.sign_in_with_email_and_password(email, password)
-                st.session_state.logged_in = True
-                st.session_state.user_email = email
-                user_info = db.child("users").child(email.replace(".", "_")).get().val()
-                if user_info:
-                    st.session_state.nickname = user_info.get("nickname", "")
-                    st.session_state.phone = user_info.get("phone", "")
-                st.success("✅ 로그인 성공!")
-                st.rerun()
-                st.stop() 
-            except:
-                st.error("❌ 로그인 실패 - 이메일 또는 비밀번호 확인")
-
-class Register:
-    def __init__(self):
-        st.title("📝 회원가입")
-        email = st.text_input("이메일", key="signup_email")
-        password = st.text_input("비밀번호", type="password", key="signup_pw")
-        nickname = st.text_input("닉네임", key="signup_nick")
-
-        if any(c in nickname for c in ".#$[]/"):
-            st.error("❌ 닉네임에 '.', '#', '$', '[', ']', '/' 는 사용할 수 없습니다.")
-            st.stop()
-
-        phone = st.text_input("휴대전화번호", key="signup_phone")
-        if st.button("회원가입"):
-            stamp_data = load_stamp_data()
-            if nickname in stamp_data:
-                st.error("❌ 이미 존재하는 닉네임입니다.")
-                return
-            try:
-                auth.create_user_with_email_and_password(email, password)
-                db.child("users").child(email.replace(".", "_")).set({
-                    "email": email,
-                    "nickname": nickname,
-                    "phone": phone
-                })
-        
-                club_status = {club: False for club in clubs}
-                stamp_data[nickname] = club_status
-                save_stamp_data(stamp_data)
-        
-                st.success("✅ 회원가입 성공!")
-                st.rerun()
-            except Exception as e:
-                st.error(f"❌ 회원가입 실패: {e}")
-
+# 도장판 출력 함수
 def show_stamp_board():
     st.title("🎯 도장판")
     st.write(f"닉네임: {st.session_state.nickname}")
 
-    stamp_data = load_stamp_data()
-
+    stamp_data = load_data("stamp_data")
     base = Image.open("StampPaperSample.png").convert("RGBA")
     overlay = Image.new("RGBA", base.size, (255, 255, 255, 0))
 
@@ -188,15 +17,15 @@ def show_stamp_board():
             try:
                 stamp = Image.open(f"stamps/{club}.png").convert("RGBA")
                 overlay = Image.alpha_composite(overlay, stamp)
-            except:
-                pass
+            except Exception as e:
+                print(f"⚠️ Stamp image not found for {club}: {e}")
 
     result = Image.alpha_composite(base, overlay)
     st.image(result, use_container_width=True)
 
     st.markdown("---")
     st.subheader("🔬 체험 부스")
-    reservation_status = load_reservation_status()
+    reservation_status = load_data("reservation_status")
     for i, club in enumerate(clubs):
         col1, col2, col3 = st.columns([3, 1.5, 1])
         with col1:
@@ -229,58 +58,23 @@ def show_stamp_board():
         st.session_state.page = "main"
         st.rerun()
 
-if not st.session_state.logged_in:
-    tab1, tab2 = st.tabs(["로그인", "회원가입"])
-    with tab1:
-        Login()
-    with tab2:
-        Register()
-
-elif st.session_state.logged_in and st.session_state.page == "main":
-    show_stamp_board()
-
-elif st.session_state.page == "club_intro":
+# 부스 소개
+if st.session_state.page == "club_intro":
     club = st.session_state.selected_club
     st.title(f"📑 {club} 부스 소개")
-
-    club_info = club_infos.get(club, {
-        "description": "소개 정보가 없습니다.",
-        "image": "club_default.png"
-    })
-
+    club_info = club_infos.get(club, {"description": "소개 정보가 없습니다.", "image": "club_default.png"})
     st.write(club_info["description"])
     st.image(club_info["image"], caption=f"{club} 활동 소개", use_container_width=True)
-
-    if st.button("🔙 메인으로", key="back_to_main"):
-        st.session_state.page = "main"
-        st.rerun()
-
-
-elif st.session_state.page == "admin_login":
-    st.title("🔑 인증")
-
-    admin_pw = st.text_input("비밀번호 입력", type="password")
-    
-    if st.button("Enter"):
-        for club, pw in club_passwords.items():
-            if admin_pw == pw:
-                st.session_state.admin_club = club
-                st.session_state.page = "admin_panel"
-                st.session_state.admin_mode = True
-                st.rerun()
-                st.stop()
-        st.error("❌ 잘못된 비밀번호입니다.")
-
-    st.markdown("---")
     if st.button("🔙 메인으로"):
         st.session_state.page = "main"
         st.rerun()
 
+# 예약 페이지
 elif st.session_state.page == "reservation_page":
     club = st.session_state.selected_club
     st.title(f"📅 {club} 예약")
 
-    reservations = load_reservations()
+    reservations = load_data("reservations")
     club_reservations = reservations.get(club, [])
     nickname = st.session_state.nickname
     phone = st.session_state.phone
@@ -289,10 +83,7 @@ elif st.session_state.page == "reservation_page":
 
     st.markdown("#### 📋 예약 현황")
     if club_reservations:
-        st.table([
-            {"시간": r["time"], "닉네임": r["nickname"]}
-            for r in club_reservations
-        ])
+        st.table([{"시간": r["time"], "닉네임": r["nickname"]} for r in club_reservations])
     else:
         st.info("아직 예약된 인원이 없습니다.")
 
@@ -303,7 +94,7 @@ elif st.session_state.page == "reservation_page":
         if st.button("❌ 예약 취소"):
             club_reservations.remove(existing)
             reservations[club] = club_reservations
-            save_reservations(reservations)
+            save_data("reservations", reservations)
             st.success("예약이 취소되었습니다.")
             time.sleep(1)
             st.rerun()
@@ -315,19 +106,40 @@ elif st.session_state.page == "reservation_page":
         ])
 
         if st.button("✅ 예약"):
-            new_entry = {"time": selected_time, "nickname": nickname, "phone": phone}
-            club_reservations.append(new_entry)
-            reservations[club] = club_reservations
-            save_reservations(reservations)
-            st.success("예약이 완료되었습니다!")
-            time.sleep(1)
-            st.rerun()
+            if any(r["time"] == selected_time for r in club_reservations):
+                st.error("❌ 이미 해당 시간에 예약이 있습니다.")
+            else:
+                new_entry = {"time": selected_time, "nickname": nickname, "phone": phone}
+                club_reservations.append(new_entry)
+                reservations[club] = club_reservations
+                save_data("reservations", reservations)
+                st.success("예약이 완료되었습니다!")
+                time.sleep(1)
+                st.rerun()
 
     st.markdown("---")
     if st.button("🔙 메인으로"):
         st.session_state.page = "main"
         st.rerun()
 
+# 관리자 로그인
+elif st.session_state.page == "admin_login":
+    st.title("🔑 인증")
+    admin_pw = st.text_input("비밀번호 입력", type="password")
+    if st.button("Enter"):
+        for club, pw in club_passwords.items():
+            if admin_pw == pw:
+                st.session_state.admin_club = club
+                st.session_state.page = "admin_panel"
+                st.session_state.admin_mode = True
+                st.rerun()
+                st.stop()
+        st.error("❌ 잘못된 비밀번호입니다.")
+    if st.button("🔙 메인으로"):
+        st.session_state.page = "main"
+        st.rerun()
+
+# 관리자 페이지
 elif st.session_state.page == "admin_panel":
     st.title(f"✅ {st.session_state.admin_club} 관리자 페이지")
     tab1, tab2 = st.tabs(["📌 도장 찍기", "📅 예약 관리"])
@@ -335,27 +147,26 @@ elif st.session_state.page == "admin_panel":
     with tab1:
         nickname = st.text_input("닉네임 입력")
         if st.button("도장 찍기"):
-            stamp_data = load_stamp_data()
+            stamp_data = load_data("stamp_data")
             if nickname not in stamp_data:
                 st.error("❌ 존재하지 않는 닉네임입니다.")
             else:
                 if not stamp_data[nickname].get(st.session_state.admin_club, False):
                     stamp_data[nickname][st.session_state.admin_club] = True
-                    save_stamp_data(stamp_data)
+                    save_data("stamp_data", stamp_data)
                     st.success("📌 도장을 찍었습니다!")
                 else:
-                    st.info("❌ 이미 도장이 찍혀 있습니다.")
+                    st.info("✅ 이미 도장이 찍혀 있습니다.")
 
     with tab2:
-        reservation_status = load_reservation_status()
-        reservations = load_reservations()
+        reservation_status = load_data("reservation_status")
+        reservations = load_data("reservations")
         club = st.session_state.admin_club
-
         is_enabled = reservation_status.get(club, False)
         new_status = st.checkbox("예약 기능 활성화", value=is_enabled)
         if new_status != is_enabled:
             reservation_status[club] = new_status
-            save_reservation_status(reservation_status)
+            save_data("reservation_status", reservation_status)
             st.success(f"예약 기능이 {'활성화' if new_status else '비활성화'}되었습니다.")
 
         if reservation_status.get(club, False):
@@ -364,12 +175,19 @@ elif st.session_state.page == "admin_panel":
             if not club_reservations:
                 st.info("예약된 항목이 없습니다.")
             else:
-                st.table([
-                    {"시간": r["time"], "닉네임": r["nickname"], "전화번호": r["phone"]}
-                    for r in club_reservations
-                ])
+                st.table([{ "시간": r["time"], "닉네임": r["nickname"], "전화번호": r["phone"] } for r in club_reservations])
 
     if st.button("🔙 메인으로"):
         st.session_state.page = "main"
         st.session_state.admin_mode = False
         st.rerun()
+
+# 진입점
+if not st.session_state.logged_in:
+    tab1, tab2 = st.tabs(["로그인", "회원가입"])
+    with tab1:
+        Login()
+    with tab2:
+        Register()
+elif st.session_state.logged_in and st.session_state.page == "main":
+    show_stamp_board()

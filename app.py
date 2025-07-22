@@ -134,6 +134,14 @@ def show_stamp_board():
     st.write(f"닉네임: {st.session_state.nickname}")
 
     stamp_data = load_data("stamp_data")
+    
+    if "last_stamp_data" not in st.session_state:
+        st.session_state.last_stamp_data = {}
+
+    if stamp_data != st.session_state.last_stamp_data:
+        st.session_state.last_stamp_data = stamp_data
+        st.rerun() 
+
     base = Image.open("StampPaperSample.png").convert("RGBA")
     overlay = Image.new("RGBA", base.size, (255, 255, 255, 0))
 

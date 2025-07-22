@@ -119,7 +119,6 @@ class Login:
                     st.session_state.nickname = user_info.get("nickname", "")
                     st.session_state.phone = user_info.get("phone", "")
                 st.success("✅ 로그인 성공!")
-                time.sleep(0.5)
                 st.rerun()
                 st.stop() 
             except:
@@ -147,7 +146,6 @@ class Register:
                 stamp_data[nickname] = []
                 save_stamp_data(stamp_data)
                 st.success("✅ 회원가입 성공!")
-                time.sleep(1)
                 st.rerun()
             except:
                 st.error("❌ 회원가입 실패 - 이메일 중복 여부 확인")
@@ -175,10 +173,19 @@ def show_stamp_board():
     st.markdown("---")
     st.subheader("🔬 체험 부스")
     for i, club in enumerate(clubs):
-        if st.button(f"{club} 부스 소개", key=f"club_button_{i}"):
-            st.session_state.page = "club_intro"
-            st.session_state.selected_club = club
-            st.rerun()
+        cols = st.columns([2, 1])
+        with cols[0]:
+            if st.button(f"{club} 부스 소개", key=f"club_button_{i}"):
+                st.session_state.page = "club_intro"
+                st.session_state.selected_club = club
+                st.rerun()
+        with cols[1]:
+            reservation_status = load_reservation_status()
+            if reservation_status.get(club, False):
+                if st.button("예약", key=f"reserve_button_{i}"):
+                    st.session_state.selected_club = club
+                    st.session_state.page = "reservation_page"
+                    st.rerun()
 
     st.markdown("---")
     if st.button("Staff only"):
@@ -211,12 +218,6 @@ elif st.session_state.page == "club_intro":
     st.write(club_info["description"])
     st.image(club_info["image"], caption=f"{club} 활동 소개", use_container_width=True)
 
-    reservation_status = load_reservation_status()
-    if reservation_status.get(club, False):
-        if st.button("📅 예약하기", key="reserve_button"):
-            st.session_state.page = "reservation_page"
-            st.rerun()
-    
     if st.button("🔙 메인으로", key="back_to_main"):
         st.session_state.page = "main"
         st.rerun()

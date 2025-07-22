@@ -78,25 +78,47 @@ def save_data(path, data):
     db.child(path).set(data)
 
 initialize_firebase_data()
+def refresh_login():
+    try:
+        if not st.session_state.get("logged_in", False) and "refresh_token" in st.session_state:
+            user = auth.refresh(st.session_state["refresh_token"])
+            st.session_state.id_token = user["idToken"]
+            st.session_state.logged_in = True
+            st.session_state.user_email = user["userId"]
+            st.session_state.page = "main"
+    except Exception as e:
+        print("자동 로그인 실패:", e)
+        st.session_state.logged_in = False
 
 class Login:
     def __init__(self):
         st.title("🔐 로그인")
-        email = st.text_input("이메일")
-        password = st.text_input("비밀번호", type="password")
+
+        email = st.text_input("이메일", key="login_email")
+        password = st.text_input("비밀번호", type="password", key="login_pw")
+
         if st.button("로그인"):
             try:
-                auth.sign_in_with_email_and_password(email, password)
-                st.session_state.logged_in = True
-                st.session_state.user_email = email
+                user = auth.sign_in_with_email_and_password(email, password)
                 user_info = db.child("users").child(email.replace(".", "_")).get().val()
                 if user_info:
+                    st.session_state.logged_in = True
+                    st.session_state.user_email = email
                     st.session_state.nickname = user_info.get("nickname", "")
                     st.session_state.phone = user_info.get("phone", "")
-                st.success("✅ 로그인 성공!")
-                st.rerun()
-            except:
-                st.error("❌ 로그인 실패 - 이메일 또는 비밀번호 확인")
+
+                    st.session_state.id_token = user['idToken']
+                    st.session_state.refresh_token = user['refreshToken']
+                    st.session_state.local_id = user['localId']
+                    st.session_state.page = "main"
+
+                    st.success("✅ 로그인 성공!")
+                    st.rerun()
+                else:
+                    st.error("❌ 사용자 정보가 존재하지 않습니다.")
+            except Exception as e:
+                print("로그인 실패:", e)
+                st.error("❌ 로그인 실패. 이메일 또는 비밀번호를 확인하세요.")
 
 class Register:
     def __init__(self):
@@ -341,6 +363,8 @@ elif st.session_state.page == "admin_panel":
         st.session_state.page = "main"
         st.session_state.admin_mode = False
         st.rerun()
+
+refresh_login()
 
 if not st.session_state.logged_in:
     tab1, tab2 = st.tabs(["로그인", "회원가입"])

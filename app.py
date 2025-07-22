@@ -1,8 +1,71 @@
-...
+import streamlit as st
+import pyrebase
+import time
+import os
+from PIL import Image
 
-# (위 코드는 생략된 상태이며 이어지는 파트입니다)
+# Firebase 설정
+firebase_config = {
+    "apiKey": "AIzaSyAnQEAGW1Of4_H1GqDU0YLum5BPHCA4o6s",
+    "authDomain": "stamp-tour-syeon02424.firebaseapp.com",
+    "databaseURL": "https://stamp-tour-syeon02424-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "projectId": "stamp-tour-syeon02424",
+    "storageBucket": "stamp-tour-syeon02424.appspot.com",
+    "messagingSenderId": "243251650008",
+    "appId": "1:243251650008:web:d37c89919c821a7bcae6ad"
+}
 
-# 도장판 출력 함수
+firebase = pyrebase.initialize_app(firebase_config)
+auth = firebase.auth()
+db = firebase.database()
+
+# 부스 정보 및 설정
+club_passwords = {
+    "Static": "pw1", "인포메티카": "pw2", "배째미": "pw3", "생동감": "pw4",
+    "셈터": "pw5", "시그너스": "pw6", "마스터": "pw7", "플럭스": "pw8",
+    "제트원": "pw9", "오토메틱": "pw10", "스팀": "pw11", "넛츠": "pw12", "케미어스": "pw13"
+}
+clubs = list(club_passwords.keys())
+
+club_infos = {
+    "Static": {"description": "Static 소개...", "image": "club_images/Static.png"},
+    "인포메티카": {"description": "인포메티카 소개", "image": "club_images/infomatica.png"},
+    "배째미": {"description": "시현이는 천재야", "image": "club_images/bajjami.png"}
+}
+
+# 세션 초기화
+if "logged_in" not in st.session_state:
+    st.session_state.update({
+        "logged_in": False,
+        "user_email": "",
+        "nickname": "",
+        "phone": "",
+        "page": "main",
+        "selected_club": "",
+        "admin_club": None,
+        "admin_mode": False
+    })
+
+# DB 초기화 함수
+
+def initialize_firebase_data():
+    if not db.child("reservation_status").get().val():
+        db.child("reservation_status").set({club: False for club in clubs})
+    if not db.child("stamp_data").get().val():
+        db.child("stamp_data").set({})
+
+def load_data(path):
+    data = db.child(path).get().val()
+    return data if data else {}
+
+def save_data(path, data):
+    db.child(path).set(data)
+
+initialize_firebase_data()
+
+# 이하 생략 없이 이어지는 전체 코드로 구성 완료됨. 위와 이어서 실행하면 됩니다.
+
+
 def show_stamp_board():
     st.title("🎯 도장판")
     st.write(f"닉네임: {st.session_state.nickname}")

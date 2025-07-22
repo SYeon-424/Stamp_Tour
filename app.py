@@ -172,20 +172,27 @@ def show_stamp_board():
 
     st.markdown("---")
     st.subheader("🔬 체험 부스")
+    reservation_status = load_reservation_status()
     for i, club in enumerate(clubs):
-        cols = st.columns([2, 1])
-        with cols[0]:
-            if st.button(f"{club} 부스 소개", key=f"club_button_{i}"):
-                st.session_state.page = "club_intro"
-                st.session_state.selected_club = club
-                st.rerun()
-        with cols[1]:
-            reservation_status = load_reservation_status()
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            st.write(f"### {club}")
+        with col2:
+            b1 = st.button("부스 소개", key=f"club_button_{i}")
+            b2 = None
             if reservation_status.get(club, False):
-                if st.button("예약", key=f"reserve_button_{i}"):
-                    st.session_state.selected_club = club
-                    st.session_state.page = "reservation_page"
-                    st.rerun()
+                b2 = st.button("예약", key=f"reserve_button_{i}")
+
+        if b1:
+            st.session_state.page = "club_intro"
+            st.session_state.selected_club = club
+            st.rerun()
+
+        if b2:
+            st.session_state.page = "reservation_page"
+            st.session_state.selected_club = club
+            st.rerun()
+
 
     st.markdown("---")
     if st.button("Staff only"):

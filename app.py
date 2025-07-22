@@ -339,8 +339,8 @@ elif st.session_state.page == "admin_panel":
             if nickname not in stamp_data:
                 st.error("❌ 존재하지 않는 닉네임입니다.")
             else:
-                if st.session_state.admin_club not in stamp_data[nickname]:
-                    stamp_data[nickname].append(st.session_state.admin_club)
+                if not stamp_data[nickname].get(st.session_state.admin_club, False):
+                    stamp_data[nickname][st.session_state.admin_club] = True
                     save_stamp_data(stamp_data)
                     st.success("📌 도장을 찍었습니다!")
                 else:

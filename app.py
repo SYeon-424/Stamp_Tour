@@ -58,6 +58,8 @@ def initialize_firebase_data():
         db.child("reservation_status").set({club: False for club in clubs})
     if not db.child("stamp_data").get().val():
         db.child("stamp_data").set({})
+    if not db.child("max_reservations").get().val():
+    db.child("max_reservations").set({club: 2 for club in clubs})
         
     try:
         existing = db.child("stamp_data").get().val()
@@ -238,8 +240,13 @@ elif st.session_state.page == "reservation_page":
         ])
 
         if st.button("✅ 예약"):
-            if any(r["time"] == selected_time for r in club_reservations):
-                st.error("❌ 이미 해당 시간에 예약이 있습니다.")
+            max_reservations = load_data("max_reservations")
+            limit = max_reservations.get(club, 2)
+            
+            count = sum(1 for r in club_reservations if r["time"] == selected_time)
+            
+            if count >= limit:
+                st.error("❌ 해당 시간대 예약 인원이 가득 찼습니다.")
             else:
                 new_entry = {"time": selected_time, "nickname": nickname, "phone": phone}
                 club_reservations.append(new_entry)
@@ -290,10 +297,23 @@ elif st.session_state.page == "admin_panel":
 
     with tab2:
         reservation_status = load_data("reservation_status")
+        max_reservations = load_data("max_reservations")
         reservations = load_data("reservations")
         club = st.session_state.admin_club
+        
         is_enabled = reservation_status.get(club, False)
         new_status = st.checkbox("예약 기능 활성화", value=is_enabled)
+        
+        max_num = max_reservations.get(club, 3)
+        new_max = st.number_input("시간당 최대 예약 인원 수", min_value=1, max_value=20, value=max_num, key=f"{club}_max")
+        
+        if new_status != is_enabled or new_max != max_num:
+            reservation_status[club] = new_status
+            max_reservations[club] = new_max
+            save_data("reservation_status", reservation_status)
+            save_data("max_reservations", max_reservations)
+            st.success(f"✅ 설정이 저장되었습니다.")
+
         if new_status != is_enabled:
             reservation_status[club] = new_status
             save_data("reservation_status", reservation_status)

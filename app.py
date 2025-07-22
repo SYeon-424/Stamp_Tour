@@ -304,10 +304,13 @@ elif st.session_state.page == "admin_panel":
         is_enabled = reservation_status.get(club, False)
         new_status = st.checkbox("예약 기능 활성화", value=is_enabled)
         
-        max_num = max_reservations.get(club, 3)
-        new_max = st.number_input("시간당 최대 예약 인원 수", min_value=1, max_value=20, value=max_num, key=f"{club}_max")
+        if new_status:
+            max_num = max_reservations.get(club, 2)
+            new_max = st.number_input("시간당 최대 예약 인원 수", min_value=1, max_value=20, value=max_num, key=f"{club}_max")
+        else:
+            new_max = max_reservations.get(club, 2)
         
-        if new_status != is_enabled or new_max != max_num:
+        if new_status != is_enabled or new_max != max_reservations.get(club, 3):
             reservation_status[club] = new_status
             max_reservations[club] = new_max
             save_data("reservation_status", reservation_status)

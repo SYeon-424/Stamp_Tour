@@ -5,7 +5,7 @@ import json
 import os
 from PIL import Image
 
-firebase_config = {
+firebase_config = { #이거 선생님 코드 그대로 가져온거라서... 고쳐야됩니다.
     "apiKey": "AIzaSyCswFmrOGU3FyLYxwbNPTp7hvQxLfTPIZw",
     "authDomain": "sw-projects-49798.firebaseapp.com",
     "databaseURL": "https://sw-projects-49798-default-rtdb.firebaseio.com",
@@ -19,7 +19,7 @@ firebase = pyrebase.initialize_app(firebase_config)
 auth = firebase.auth()
 db = firebase.database()
 
-club_passwords = {
+club_passwords = { #비밀번호 설정하는곳_부스순서대로 고쳐서 비번 바꾸기
     "Static": "pw1",
     "인포메티카": "pw2",
     "배째미": "pw3",
@@ -37,7 +37,7 @@ club_passwords = {
 
 clubs = list(club_passwords.keys())
 
-club_infos = {
+club_infos = { #_부스소개는 여기서 넣고, 이미지는 club_images 폴더에 png 파일로
     "Static": {
         "description": "Static 소개... 유지원은 일해라아!!",
         "image": "club_images/Static.png"
@@ -300,7 +300,7 @@ elif st.session_state.page == "reservation_page":
             st.rerun()
 
     st.markdown("---")
-    if st.button("🔙 뒤로 가기"):
+    if st.button("🔙 메인으로"):
         st.session_state.page = "main"
         st.rerun()
 

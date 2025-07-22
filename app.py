@@ -150,8 +150,8 @@ class Register:
                 save_stamp_data(stamp_data)
                 st.success("✅ 회원가입 성공!")
                 st.rerun()
-            except:
-                st.error("❌ 회원가입 실패 - 이메일 중복 여부 확인")
+            except Exception as e:
+                st.error(f"❌ 회원가입 실패: {e}")
 
 def show_stamp_board():
     st.title("🎯 도장판")

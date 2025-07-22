@@ -59,7 +59,7 @@ def initialize_firebase_data():
     if not db.child("stamp_data").get().val():
         db.child("stamp_data").set({})
     if not db.child("max_reservations").get().val():
-    db.child("max_reservations").set({club: 2 for club in clubs})
+        db.child("max_reservations").set({club: 2 for club in clubs})
         
     try:
         existing = db.child("stamp_data").get().val()

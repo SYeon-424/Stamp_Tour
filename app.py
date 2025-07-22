@@ -5,15 +5,14 @@ import json
 import os
 from PIL import Image
 
-firebase_config = { #이거 선생님 코드 그대로 가져온거라서... 고쳐야됩니다.
-    "apiKey": "AIzaSyCswFmrOGU3FyLYxwbNPTp7hvQxLfTPIZw",
-    "authDomain": "sw-projects-49798.firebaseapp.com",
-    "databaseURL": "https://sw-projects-49798-default-rtdb.firebaseio.com",
-    "projectId": "sw-projects-49798",
-    "storageBucket": "sw-projects-49798.appspot.com",
-    "messagingSenderId": "812186368395",
-    "appId": "1:812186368395:web:be2f7291ce54396209d78e"
-}
+firebase_config = {
+  apiKey: "AIzaSyAnQEAGW1Of4_H1GqDU0YLum5BPHCA4o6s",
+  authDomain: "stamp-tour-syeon02424.firebaseapp.com",
+  projectId: "stamp-tour-syeon02424",
+  storageBucket: "stamp-tour-syeon02424.firebasestorage.app",
+  messagingSenderId: "243251650008",
+  appId: "1:243251650008:web:d37c89919c821a7bcae6ad"
+};
 
 firebase = pyrebase.initialize_app(firebase_config)
 auth = firebase.auth()

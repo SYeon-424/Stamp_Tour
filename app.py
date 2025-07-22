@@ -19,9 +19,7 @@ firebase = pyrebase.initialize_app(firebase_config)
 auth = firebase.auth()
 db = firebase.database()
 
-db.child("stamp_data").set({
-    "S.Yeon": []
-})
+db.child("stamp_data").set({})
     
 db.child("reservation_status").set({
     "Static": False,
@@ -133,6 +131,11 @@ class Register:
         email = st.text_input("이메일", key="signup_email")
         password = st.text_input("비밀번호", type="password", key="signup_pw")
         nickname = st.text_input("닉네임", key="signup_nick")
+
+        if any(c in nickname for c in ".#$[]/"):
+            st.error("❌ 닉네임에 '.', '#', '$', '[', ']', '/' 는 사용할 수 없습니다.")
+            st.stop()
+
         phone = st.text_input("휴대전화번호", key="signup_phone")
         if st.button("회원가입"):
             stamp_data = load_stamp_data()

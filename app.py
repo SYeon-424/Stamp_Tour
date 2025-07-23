@@ -311,42 +311,55 @@ elif st.session_state.page == "edit_profile":
     msg_area = st.empty()
 
     if st.button("✅ 저장"):
-        updated = False 
-
+        updated = False
+        reservations = load_data("reservations")
+    
+        # 닉네임 유효성 검사
         if any(c in new_nick for c in ".#$[]/ ") or new_nick.strip() == "":
             msg_area.error("❌ 닉네임에 공백이나 '.', '#', '$', '[', ']', '/' 는 사용할 수 없습니다.")
-        elif new_nick != current_nick:
-            stamp_data = load_data("stamp_data")
-            if new_nick in stamp_data:
-                msg_area.error("❌ 이미 존재하는 닉네임입니다.")
-            else:
-                stamp_data[new_nick] = stamp_data.pop(current_nick)
-                save_data("stamp_data", stamp_data)
-
-                reservations = load_data("reservations")
+        else:
+            # ✅ 닉네임 변경
+            if new_nick != current_nick:
+                stamp_data = load_data("stamp_data")
+                if new_nick in stamp_data:
+                    msg_area.error("❌ 이미 존재하는 닉네임입니다.")
+                else:
+                    stamp_data[new_nick] = stamp_data.pop(current_nick)
+                    save_data("stamp_data", stamp_data)
+    
+                    for club, lst in reservations.items():
+                        for r in lst:
+                            if r["nickname"] == current_nick:
+                                r["nickname"] = new_nick
+                    save_data("reservations", reservations)
+    
+                    email_key = st.session_state.user_email.replace(".", "_")
+                    db.child("users").child(email_key).update({"nickname": new_nick})
+    
+                    st.session_state.nickname = new_nick
+                    current_nick = new_nick  # 업데이트된 이름 기준으로 다시 확인
+                    updated = True
+    
+            # ✅ 전화번호 변경
+            if new_phone != current_phone:
+                email_key = st.session_state.user_email.replace(".", "_")
+                db.child("users").child(email_key).update({"phone": new_phone})
+                st.session_state.phone = new_phone
+                current_phone = new_phone
+                updated = True
+    
+                # 🔁 예약 목록 내 전화번호 업데이트
                 for club, lst in reservations.items():
                     for r in lst:
                         if r["nickname"] == current_nick:
-                            r["nickname"] = new_nick
+                            r["phone"] = new_phone
                 save_data("reservations", reservations)
-
-                email_key = st.session_state.user_email.replace(".", "_")
-                db.child("users").child(email_key).update({"nickname": new_nick})
-
-                st.session_state.nickname = new_nick
-                updated = True
-
-        if new_phone != current_phone:
-            email_key = st.session_state.user_email.replace(".", "_")
-            db.child("users").child(email_key).update({"phone": new_phone})
-            st.session_state.phone = new_phone
-            updated = True
-
-        if updated:
-            msg_area.success("✅ 변경사항이 저장되었습니다.")
-            time.sleep(1.5)
-            st.session_state.page = "main"
-            st.rerun()
+    
+            if updated:
+                msg_area.success("✅ 변경사항이 저장되었습니다.")
+                time.sleep(1.5)
+                st.session_state.page = "main"
+                st.rerun()
 
 elif st.session_state.page == "admin_login":
     st.title("🗝️ 인증")

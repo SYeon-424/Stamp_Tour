@@ -354,6 +354,7 @@ elif st.session_state.page == "profile":
     my_data = users_data.get(my_email_key, {})
     my_friends = my_data.get("friends", [])
     emojis = load_data("emojis")
+    stamp_data = load_data("stamp_data")
 
     target_user = next((u for u in users_data.values() if u.get("nickname") == nickname), None)
 

@@ -506,7 +506,7 @@ elif st.session_state.page == "profile":
                                 time.sleep(1)
                                 st.rerun()
 
-        ALLOWED_EMOJIS = ["❤️", "💕", "🎉", "🔥", "🌟", "👏", "😎", "😊", "🙃", "🎉", "👍", "🤝"]
+        ALLOWED_EMOJIS = ["❤️", "💕", "❤️‍🔥", "💯", "🔥", "🌟", "👏", "😎", "😊", "🙃", "🎉", "👍", "🤝"]
         if is_mutual_friend and is_visible:
             st.markdown("### 😎 방명록 남기기")
             emoji_input = st.selectbox("이모티콘 선택", [""] + ALLOWED_EMOJIS, key="emoji_select")

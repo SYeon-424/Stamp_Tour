@@ -157,6 +157,9 @@ def show_stamp_board():
     st.title("🎯 도장판")
     st.write(f"닉네임: {st.session_state.nickname}")
 
+    if st.button("🔄 새로고침"):
+        st.rerun()
+
     stamp_data = load_data("stamp_data")
     
     if "last_stamp_data" not in st.session_state:
@@ -337,7 +340,7 @@ elif st.session_state.page == "admin_panel":
             new_max = st.number_input("시간당 최대 예약 인원 수", min_value=1, max_value=20, value=max_num, key=f"{club}_max")
         else:
             new_max = max_reservations.get(club, 2)
-        
+
         if new_status != is_enabled or new_max != max_reservations.get(club, 3):
             reservation_status[club] = new_status
             max_reservations[club] = new_max
@@ -349,6 +352,9 @@ elif st.session_state.page == "admin_panel":
             reservation_status[club] = new_status
             save_data("reservation_status", reservation_status)
             st.success(f"예약 기능이 {'활성화' if new_status else '비활성화'}되었습니다.")
+
+        if st.button("🔄 새로고침"):
+        st.rerun()
 
         if reservation_status.get(club, False):
             st.markdown("#### 📋 예약 목록")

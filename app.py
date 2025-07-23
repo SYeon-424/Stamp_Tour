@@ -340,7 +340,7 @@ elif st.session_state.page == "friends":
                     st.session_state.viewing_profile = friend
                     st.rerun()
 
-    if st.button("🔙 돌아가기"):
+    if st.button("🔙 메인으로"):
         st.session_state.page = "main"
         st.rerun()
 
@@ -402,7 +402,7 @@ elif st.session_state.page == "profile":
                 time.sleep(1)
                 st.rerun()
 
-    if st.button("🔙 친구 목록으로"):
+    if st.button("🔙 돌아가기"):
         st.session_state.page = "friends"
         st.rerun()
 

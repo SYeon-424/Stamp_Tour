@@ -161,28 +161,51 @@ class Register:
 
 
 def show_stamp_board():
-    st.title("🎯 도장판")
-    st.write(f"닉네임: {st.session_state.nickname}")
-
+    # ✅ 친구 요청 수락 UI (도장판 상단)
     users_data = load_data("users")
     my_nick = st.session_state.nickname
     my_email_key = st.session_state.user_email.replace(".", "_")
     my_data = users_data.get(my_email_key, {})
-
+    my_friends = my_data.get("friends", [])
+    
     if my_data.get("pending_requests"):
-        count = len(my_data["pending_requests"])
-        st.info(f"📬 {count}건의 친구 요청이 도착했어요! [친구 관리] 메뉴에서 확인해보세요.")
+        st.subheader("📬 친구 요청 수락")
+        for requester in my_data["pending_requests"]:
+            col1, col2 = st.columns([4, 1])
+            with col1:
+                st.write(f"👉 {requester}")
+            with col2:
+                if st.button("수락", key=f"accept_{requester}"):
+                    # 내 친구 목록에 추가
+                    if requester not in my_friends:
+                        my_friends.append(requester)
+                        db.child("users").child(my_email_key).update({"friends": my_friends})
+    
+                    # 요청자 정보 업데이트
+                    requester_email_key = next((k for k, v in users_data.items() if v.get("nickname") == requester), None)
+                    if requester_email_key:
+                        requester_data = users_data[requester_email_key]
+                        requester_friends = requester_data.get("friends", [])
+                        if my_nick not in requester_friends:
+                            requester_friends.append(my_nick)
+                            db.child("users").child(requester_email_key).update({"friends": requester_friends})
+    
+                        # 요청자의 sent_requests에서 내 닉네임 제거
+                        requester_sent = requester_data.get("sent_requests", [])
+                        if my_nick in requester_sent:
+                            requester_sent.remove(my_nick)
+                            db.child("users").child(requester_email_key).update({"sent_requests": requester_sent})
+    
+                    # 내 pending_requests에서 제거
+                    my_pending = my_data.get("pending_requests", [])
+                    my_pending.remove(requester)
+                    db.child("users").child(my_email_key).update({"pending_requests": my_pending})
+    
+                    st.success(f"{requester}님을 친구로 추가했습니다.")
+                    st.rerun()
 
-    # 내가 보냈던 요청 중 실제 친구 목록에 포함된 사람들 찾기
-    sent = my_data.get("sent_requests", [])
-    friends = my_data.get("friends", [])
-    accepted = [nick for nick in sent if nick in friends]
-
-    if accepted:
-        for nick in accepted:
-            st.success(f"🤝 {nick}님이 친구 요청을 수락했어요!")
-            sent.remove(nick)
-        db.child("users").child(my_email_key).update({"sent_requests": sent})
+    st.title("🎯 도장판")
+    st.write(f"닉네임: {st.session_state.nickname}")
 
     if st.button("🔄 새로고침"):
         st.rerun()

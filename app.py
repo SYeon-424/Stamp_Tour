@@ -370,7 +370,7 @@ elif st.session_state.page == "admin_panel":
             st.markdown("#### ⏰ 예약 시간 관리")
             
             available_times = load_data("available_times").get(club, [])
-            new_time = st.text_input("새로운 시간 추가 (예: 15:00)", key=f"{club}_new_time")
+            new_time = st.text_input("새로운 시간 추가 (24시간 단위로 적어주세요 -> 1시(x), 13시(o))", key=f"{club}_new_time")
             if st.button("➕ 시간 추가"):
                 if new_time and new_time not in available_times:
                     available_times.append(new_time)

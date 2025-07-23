@@ -311,6 +311,8 @@ elif st.session_state.page == "edit_profile":
     msg_area = st.empty()
 
     if st.button("✅ 저장"):
+        updated = False 
+
         if any(c in new_nick for c in ".#$[]/ ") or new_nick.strip() == "":
             msg_area.error("❌ 닉네임에 공백이나 '.', '#', '$', '[', ']', '/' 는 사용할 수 없습니다.")
         elif new_nick != current_nick:
@@ -332,28 +334,19 @@ elif st.session_state.page == "edit_profile":
                 db.child("users").child(email_key).update({"nickname": new_nick})
 
                 st.session_state.nickname = new_nick
-                msg_area.success("✅ 닉네임이 변경되었습니다.")
-                
-                time.sleep(2)
-                st.session_state.page = "main"
-                st.rerun()
-
+                updated = True
 
         if new_phone != current_phone:
             email_key = st.session_state.user_email.replace(".", "_")
             db.child("users").child(email_key).update({"phone": new_phone})
             st.session_state.phone = new_phone
-            msg_area.success("✅ 전화번호가 변경되었습니다.")
-            
-            time.sleep(2)
+            updated = True
+
+        if updated:
+            msg_area.success("✅ 변경사항이 저장되었습니다.")
+            time.sleep(1.5)
             st.session_state.page = "main"
             st.rerun()
-
-    st.markdown("---")
-    if st.button("🔙 메인으로"):
-        st.session_state.page = "main"
-        st.rerun()
-
 
 elif st.session_state.page == "admin_login":
     st.title("🗝️ 인증")

@@ -165,6 +165,9 @@ def show_stamp_board():
 
     if st.button("🔄 새로고침"):
         st.rerun()
+    if st.button("친구 관리"):
+        st.session_state.page = "friends"
+        st.rerun()
 
     stamp_data = load_data("stamp_data")
     
@@ -298,6 +301,20 @@ elif st.session_state.page == "reservation_page":
     if st.button("🔙 메인으로"):
         st.session_state.page = "main"
         st.rerun()
+
+elif st.session_state.page == "friends":
+    st.title("👥 친구")
+    tab1, tab2 = st.tabs(["🌍 둘러보기", "📜 친구 목록"])
+
+    with tab1:
+        st.info("🔍 둘러보기 기능은 추후 추가 예정입니다.")
+    with tab2:
+        st.info("📜 친구 목록 기능은 추후 추가 예정입니다.")
+
+    if st.button("🔙 돌아가기"):
+        st.session_state.page = "main"
+        st.rerun()
+
 
 elif st.session_state.page == "setting":
     st.title("⚙️ 설정")

@@ -164,6 +164,26 @@ def show_stamp_board():
     st.title("🎯 도장판")
     st.write(f"닉네임: {st.session_state.nickname}")
 
+    users_data = load_data("users")
+    my_nick = st.session_state.nickname
+    my_email_key = st.session_state.user_email.replace(".", "_")
+    my_data = users_data.get(my_email_key, {})
+
+    if my_data.get("pending_requests"):
+        count = len(my_data["pending_requests"])
+        st.info(f"📬 {count}건의 친구 요청이 도착했어요! [친구 관리] 메뉴에서 확인해보세요.")
+
+    # 내가 보냈던 요청 중 실제 친구 목록에 포함된 사람들 찾기
+    sent = my_data.get("sent_requests", [])
+    friends = my_data.get("friends", [])
+    accepted = [nick for nick in sent if nick in friends]
+
+    if accepted:
+        for nick in accepted:
+            st.success(f"🤝 {nick}님이 친구 요청을 수락했어요!")
+            sent.remove(nick)
+        db.child("users").child(my_email_key).update({"sent_requests": sent})
+
     if st.button("🔄 새로고침"):
         st.rerun()
     if st.button("친구 관리"):

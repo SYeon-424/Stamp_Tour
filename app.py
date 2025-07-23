@@ -299,7 +299,7 @@ elif st.session_state.page == "reservation_page":
         st.session_state.page = "main"
         st.rerun()
 
-elif st.session_state.page == "settings":
+elif st.session_state.page == "setting":
     st.title("⚙️ 설정")
     tab1, tab2 = st.tabs(["👤 개인정보 수정", "🧑‍🤝‍🧑 친구 설정"])
 

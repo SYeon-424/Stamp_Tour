@@ -366,7 +366,7 @@ elif st.session_state.page == "profile":
         if is_visible:
             base = Image.open("StampPaperSample.png").convert("RGBA")
             overlay = Image.new("RGBA", base.size, (255, 255, 255, 0))
-            user_stamps = stamp_data.get(st.session_state.nickname, {})
+            user_stamps = stamp_data.get(nickname, {})
             for club, stamped in user_stamps.items():
                 if stamped:
                     try:

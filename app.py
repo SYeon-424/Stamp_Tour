@@ -388,7 +388,17 @@ elif st.session_state.page == "profile":
                 st.info("아직 아무도 방문하지 않았습니다.")
             else:
                 for sender, emoji in emoji_data.items():
-                    st.markdown(f"- {sender}: {emoji}")
+                    col1, col2 = st.columns([4, 1])
+                    with col1:
+                        st.markdown(f"- **{sender}**: {emoji}")
+                    with col2:
+                        if sender == my_nick:
+                            if st.button("❌ 삭제", key=f"del_emoji_{sender}"):
+                                del emojis[nickname][sender]
+                                save_data("emojis", emojis)
+                                st.success("방명록이 삭제되었습니다.")
+                                time.sleep(1)
+                                st.rerun()
 
         ALLOWED_EMOJIS = ["❤️", "💕", "🎉", "🔥", "🌟", "👏", "😎", "😊", "🙃", "🎉", "👍", "🤝"]
         if is_mutual_friend and is_visible:

@@ -216,14 +216,17 @@ def show_stamp_board():
 
         st.markdown("---")
 
-    st.markdown("---")
-    if st.button("Staff only"):
-        st.session_state.page = "admin_login"
+    if st.button("✏️ 개인정보 수정"):
+        st.session_state.page = "edit_profile"
         st.rerun()
     if st.button("로그아웃"):
         st.session_state.logged_in = False
         st.session_state.page = "main"
         st.rerun()
+    st.markdown("---")
+    if st.button("Staff only"):
+        st.session_state.page = "admin_login"
+        st.rerun(
 
 if st.session_state.page == "club_intro":
     club = st.session_state.selected_club
@@ -295,6 +298,57 @@ elif st.session_state.page == "reservation_page":
     if st.button("🔙 메인으로"):
         st.session_state.page = "main"
         st.rerun()
+
+elif st.session_state.page == "edit_profile":
+    st.title("✏️ 개인정보 수정")
+
+    current_nick = st.session_state.nickname
+    current_phone = st.session_state.phone
+
+    new_nick = st.text_input("새 닉네임", value=current_nick, key="edit_nick")
+    new_phone = st.text_input("새 전화번호", value=current_phone, key="edit_phone")
+
+    if st.button("✅ 저장"):
+        if any(c in new_nick for c in ".#$[]/ ") or new_nick.strip() == "":
+            st.error("❌ 닉네임에 공백이나 '.', '#', '$', '[', ']', '/' 는 사용할 수 없습니다.")
+            st.stop()
+
+        if new_nick != current_nick:
+            stamp_data = load_data("stamp_data")
+            if new_nick in stamp_data:
+                st.error("❌ 이미 존재하는 닉네임입니다.")
+                st.stop()
+            else:
+                # 닉네임 변경 처리
+                stamp_data[new_nick] = stamp_data.pop(current_nick)
+                save_data("stamp_data", stamp_data)
+
+                reservations = load_data("reservations")
+                for club, lst in reservations.items():
+                    for r in lst:
+                        if r["nickname"] == current_nick:
+                            r["nickname"] = new_nick
+                save_data("reservations", reservations)
+
+                email_key = st.session_state.user_email.replace(".", "_")
+                db.child("users").child(email_key).update({"nickname": new_nick})
+
+                st.session_state.nickname = new_nick
+
+        if new_phone != current_phone:
+            email_key = st.session_state.user_email.replace(".", "_")
+            db.child("users").child(email_key).update({"phone": new_phone})
+            st.session_state.phone = new_phone
+
+        st.success("✅ 수정 완료!")
+        time.sleep(1)
+        st.session_state.page = "main"
+        st.rerun()
+
+    if st.button("🔙 돌아가기"):
+        st.session_state.page = "main"
+        st.rerun()
+
 
 elif st.session_state.page == "admin_login":
     st.title("🗝️ 인증")

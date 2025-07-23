@@ -361,7 +361,7 @@ elif st.session_state.page == "reservation_page":
 elif st.session_state.page == "friends":
     st.title("👥 친구 관리")
     
-    tab1, tab2, tab3 = st.tabs(["🌍 둘러보기", "📜 친구 목록", "🏆 순위"])
+    tab1, tab2, tab3, tab4 = st.tabs(["🌍 둘러보기", "📜 친구 목록", "🏆 도장판 완성 순위", "🏆 방명록 순위"])
 
     users_data = load_data("users")
     my_nick = st.session_state.nickname
@@ -387,7 +387,7 @@ elif st.session_state.page == "friends":
 
     with tab2:
         if not my_friends:
-            st.info("🙁 친구가 없습니다.")
+            st.info("🙁 아직 친구가 없습니다.")
         else:
             for friend in my_friends:
                 if st.button(friend, key=f"friend_{friend}"):
@@ -396,7 +396,34 @@ elif st.session_state.page == "friends":
                     st.rerun()
 
     with tab3:
-        st.subheader("🏆 이모지 많이 받은 순위")
+        st.subheader("🏆 도장판 완성 순위")
+    
+        stamp_data = load_data("stamp_data")
+    
+        finish_times = []
+        for nick, data in stamp_data.items():
+            if isinstance(data, dict) and data.get("finished_at"):
+                finish_times.append((nick, data["finished_at"]))
+    
+        if not finish_times:
+            st.info("아직 도장판을 완성한 사람이 없습니다.")
+        else:
+            finish_times.sort(key=lambda x: x[1]) 
+    
+            badges = ["🥇", "🥈", "🥉"]
+            for i, (nick, ts) in enumerate(finish_times, start=1):
+                badge = badges[i-1] if i <= 3 else ""
+                nick_display = f"**{badge} {nick}**" if i <= 3 else f"{badge} {nick}"
+                tstr = time.strftime("%m월 %d일 %H:%M", time.localtime(ts))
+                col1, col2 = st.columns([4, 2])
+                with col1:
+                    st.markdown(nick_display)
+                with col2:
+                    st.markdown(f"🏁 {tstr}")
+
+
+    with tab4:
+        st.subheader("🏆 방명록 순위")
     
         emojis = load_data("emojis")
         if not emojis:
@@ -622,8 +649,13 @@ elif st.session_state.page == "admin_panel":
             else:
                 if not stamp_data[nickname].get(st.session_state.admin_club, False):
                     stamp_data[nickname][st.session_state.admin_club] = True
+                    if all(stamp_data[nickname].values()):
+                        if "finished_at" not in stamp_data[nickname]:
+                            stamp_data[nickname]["finished_at"] = time.time()
+                
                     save_data("stamp_data", stamp_data)
                     st.success("📌 도장을 찍었습니다!")
+
                 else:
                     st.info("❌ 이미 도장이 찍혀 있습니다.")
 

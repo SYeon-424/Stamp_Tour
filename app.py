@@ -161,7 +161,6 @@ class Register:
 
 
 def show_stamp_board():
-    # ✅ 친구 요청 수락 UI (도장판 상단)
     users_data = load_data("users")
     my_nick = st.session_state.nickname
     my_email_key = st.session_state.user_email.replace(".", "_")
@@ -176,12 +175,10 @@ def show_stamp_board():
                 st.write(f"👉 {requester}")
             with col2:
                 if st.button("수락", key=f"accept_{requester}"):
-                    # 내 친구 목록에 추가
                     if requester not in my_friends:
                         my_friends.append(requester)
                         db.child("users").child(my_email_key).update({"friends": my_friends})
     
-                    # 요청자 정보 업데이트
                     requester_email_key = next((k for k, v in users_data.items() if v.get("nickname") == requester), None)
                     if requester_email_key:
                         requester_data = users_data[requester_email_key]
@@ -190,13 +187,11 @@ def show_stamp_board():
                             requester_friends.append(my_nick)
                             db.child("users").child(requester_email_key).update({"friends": requester_friends})
     
-                        # 요청자의 sent_requests에서 내 닉네임 제거
                         requester_sent = requester_data.get("sent_requests", [])
                         if my_nick in requester_sent:
                             requester_sent.remove(my_nick)
                             db.child("users").child(requester_email_key).update({"sent_requests": requester_sent})
     
-                    # 내 pending_requests에서 제거
                     my_pending = my_data.get("pending_requests", [])
                     my_pending.remove(requester)
                     db.child("users").child(my_email_key).update({"pending_requests": my_pending})
@@ -210,7 +205,6 @@ def show_stamp_board():
                     if requester in my_pending:
                         my_pending.remove(requester)
                         db.child("users").child(my_email_key).update({"pending_requests": my_pending})
-                    # 요청자의 sent_requests에서도 내 닉네임 제거
                     requester_email_key = next((k for k, v in users_data.items() if v.get("nickname") == requester), None)
                     if requester_email_key:
                         requester_data = users_data[requester_email_key]
@@ -367,7 +361,7 @@ elif st.session_state.page == "reservation_page":
 elif st.session_state.page == "friends":
     st.title("👥 친구 관리")
     
-    tab1, tab2 = st.tabs(["🌍 둘러보기", "📜 친구 목록"])
+    tab1, tab2, tab3 = st.tabs(["🌍 둘러보기", "📜 친구 목록", "🏆 순위"])
 
     users_data = load_data("users")
     my_nick = st.session_state.nickname
@@ -400,6 +394,26 @@ elif st.session_state.page == "friends":
                     st.session_state.page = "profile"
                     st.session_state.viewing_profile = friend
                     st.rerun()
+
+    with tab3:
+        st.subheader("🏆 이모지 많이 받은 순위")
+    
+        emojis = load_data("emojis")
+        if not emojis:
+            st.info("아직 아무도 방명록을 남기지 않았습니다.")
+        else:
+            emoji_counts = [(nickname, len(emojis[nickname])) for nickname in emojis]
+            emoji_counts.sort(key=lambda x: x[1], reverse=True)
+    
+            badges = ["🥇", "🥈", "🥉"]
+            for i, (nick, count) in enumerate(emoji_counts, start=1):
+                badge = badges[i-1] if i <= 3 else ""
+                nick_display = f"**{badge} {nick}**" if i <= 3 else f"{badge} {nick}"
+                col1, col2 = st.columns([4, 1])
+                with col1:
+                    st.markdown(nick_display)
+                with col2:
+                    st.markdown(f"**{count}개**")
 
     if st.button("🔙 메인으로"):
         st.session_state.page = "main"
@@ -574,6 +588,7 @@ elif st.session_state.page == "setting":
                 "searchable": search_checkbox
             })
 
+    st.markdown("---")
     if st.button("🔙 돌아가기"):
         st.session_state.page = "main"
         st.rerun()

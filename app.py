@@ -226,7 +226,7 @@ def show_stamp_board():
     st.markdown("---")
     if st.button("Staff only"):
         st.session_state.page = "admin_login"
-        st.rerun(
+        st.rerun()
 
 if st.session_state.page == "club_intro":
     club = st.session_state.selected_club

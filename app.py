@@ -351,19 +351,36 @@ elif st.session_state.page == "profile":
     st.title(f"📄 {nickname}의 프로필")
 
     users_data = load_data("users")
+    my_nick = st.session_state.nickname
+    my_email_key = st.session_state.user_email.replace(".", "_")
+    my_data = users_data.get(my_email_key, {})
+    my_friends = my_data.get("friends", [])
+
     target_user = next((u for u in users_data.values() if u.get("nickname") == nickname), None)
 
     if not target_user:
         st.error("❌ 존재하지 않는 사용자입니다.")
     else:
-        if target_user.get("public_stamp", True) or (my_nick in target_user.get("friends", [])):
+        # 도장판 표시 여부 판단
+        is_visible = target_user.get("public_stamp", True) or (my_nick in target_user.get("friends", []))
+
+        if is_visible:
             st.image("StampPaperSample.png", caption="도장판 (예시)", use_container_width=True)
         else:
             st.warning("🔒 도장판이 비공개로 설정되어 있습니다.")
 
-        st.button("➕ 친구 추가")  # 기능 나중에 붙일 예정
+        # 친구추가 상태 확인 및 처리
+        if nickname in my_friends:
+            st.info("✅ 이미 친구추가된 사용자입니다.")
+        else:
+            if st.button("➕ 친구 추가"):
+                my_friends.append(nickname)
+                db.child("users").child(my_email_key).update({"friends": my_friends})
+                st.success("🎉 친구 추가 완료!")
+                time.sleep(1)
+                st.rerun()
 
-    if st.button("🔙 친구 목록으로"):
+    if st.button("🔙 돌아가기"):
         st.session_state.page = "friends"
         st.rerun()
 

@@ -308,18 +308,16 @@ elif st.session_state.page == "edit_profile":
     new_nick = st.text_input("새 닉네임", value=current_nick, key="edit_nick")
     new_phone = st.text_input("새 전화번호", value=current_phone, key="edit_phone")
 
+    msg_area = st.empty()
+
     if st.button("✅ 저장"):
         if any(c in new_nick for c in ".#$[]/ ") or new_nick.strip() == "":
-            st.error("❌ 닉네임에 공백이나 '.', '#', '$', '[', ']', '/' 는 사용할 수 없습니다.")
-            st.stop()
-
-        if new_nick != current_nick:
+            msg_area.error("❌ 닉네임에 공백이나 '.', '#', '$', '[', ']', '/' 는 사용할 수 없습니다.")
+        elif new_nick != current_nick:
             stamp_data = load_data("stamp_data")
             if new_nick in stamp_data:
-                st.error("❌ 이미 존재하는 닉네임입니다.")
-                st.stop()
+                msg_area.error("❌ 이미 존재하는 닉네임입니다.")
             else:
-                # 닉네임 변경 처리
                 stamp_data[new_nick] = stamp_data.pop(current_nick)
                 save_data("stamp_data", stamp_data)
 
@@ -334,18 +332,20 @@ elif st.session_state.page == "edit_profile":
                 db.child("users").child(email_key).update({"nickname": new_nick})
 
                 st.session_state.nickname = new_nick
+                msg_area.success("✅ 닉네임이 변경되었습니다.")
 
         if new_phone != current_phone:
             email_key = st.session_state.user_email.replace(".", "_")
             db.child("users").child(email_key).update({"phone": new_phone})
             st.session_state.phone = new_phone
+            msg_area.success("✅ 전화번호가 변경되었습니다.")
 
-        st.success("✅ 수정 완료!")
-        time.sleep(1)
+        time.sleep(2)
         st.session_state.page = "main"
         st.rerun()
 
-    if st.button("🔙 돌아가기"):
+    st.markdown("---")
+    if st.button("🔙 메인으로"):
         st.session_state.page = "main"
         st.rerun()
 

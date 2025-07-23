@@ -335,7 +335,7 @@ elif st.session_state.page == "edit_profile":
                 msg_area.success("✅ 닉네임이 변경되었습니다.")
                 
                 time.sleep(2)
-                st.session_state.page = "main
+                st.session_state.page = "main"
                 st.rerun()
 
 
@@ -346,7 +346,7 @@ elif st.session_state.page == "edit_profile":
             msg_area.success("✅ 전화번호가 변경되었습니다.")
             
             time.sleep(2)
-            st.session_state.page = "main
+            st.session_state.page = "main"
             st.rerun()
 
     st.markdown("---")

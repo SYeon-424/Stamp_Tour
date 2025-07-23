@@ -374,43 +374,6 @@ elif st.session_state.page == "friends":
     my_email_key = st.session_state.user_email.replace(".", "_")
     my_data = users_data.get(my_email_key, {})
     my_friends = my_data.get("friends", [])
-
-    if my_data.get("pending_requests"):
-        st.subheader("📬 친구 요청 수락")
-        for requester in my_data["pending_requests"]:
-            col1, col2 = st.columns([4, 1])
-            with col1:
-                st.write(f"👉 {requester}")
-            with col2:
-                if st.button("수락", key=f"accept_{requester}"):
-                # 서로 friends 목록에 추가
-                    if requester not in my_friends:
-                        my_friends.append(requester)
-                        db.child("users").child(my_email_key).update({"friends": my_friends})
-                
-                # 요청자도 내 닉네임을 친구 목록에 추가
-                    requester_email_key = next((k for k, v in users_data.items() if v.get("nickname") == requester), None)
-                    if requester_email_key:
-                        requester_data = users_data[requester_email_key]
-                        requester_friends = requester_data.get("friends", [])
-                        requester_friends.append(my_nick)
-                        db.child("users").child(requester_email_key).update({"friends": requester_friends})
-                    
-                    # 요청자 sent_requests에서 내 닉네임 제거
-                        requester_sent = requester_data.get("sent_requests", [])
-                        if my_nick in requester_sent:
-                            requester_sent.remove(my_nick)    
-                            db.child("users").child(requester_email_key).update({"sent_requests": requester_sent})
-    
-                # 내 pending_requests에서 제거
-                    my_pending = my_data.get("pending_requests", [])
-                    my_pending.remove(requester)
-                    db.child("users").child(my_email_key).update({"pending_requests": my_pending})
-
-                    st.success(f"{requester}님을 친구로 추가했습니다.")
-                    st.rerun()
-
-
     with tab1:
         st.subheader("닉네임 검색")
         query = st.text_input("닉네임 입력")

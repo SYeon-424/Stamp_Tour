@@ -50,7 +50,8 @@ if "logged_in" not in st.session_state:
         "page": "main",
         "selected_club": "",
         "admin_club": None,
-        "admin_mode": False
+        "admin_mode": False,
+        "viewing_profile": ""
     })
 
 def initialize_firebase_data():
@@ -303,16 +304,67 @@ elif st.session_state.page == "reservation_page":
         st.rerun()
 
 elif st.session_state.page == "friends":
-    st.title("👥 친구")
+    st.title("👥 친구 관리")
     tab1, tab2 = st.tabs(["🌍 둘러보기", "📜 친구 목록"])
 
+    users_data = load_data("users")
+    my_nick = st.session_state.nickname
+    my_email_key = st.session_state.user_email.replace(".", "_")
+    my_data = users_data.get(my_email_key, {})
+    my_friends = my_data.get("friends", [])
+
+    # 🌍 둘러보기 탭
     with tab1:
-        st.info("🔍 둘러보기 기능은 추후 추가 예정입니다.")
+        st.subheader("닉네임 검색")
+        query = st.text_input("닉네임 입력")
+
+        if query:
+            matched = [
+                user["nickname"] for user in users_data.values()
+                if query.lower() in user["nickname"].lower()
+                and user.get("searchable", True)
+                and user["nickname"] != my_nick
+            ]
+            for nick in matched:
+                if st.button(nick, key=f"search_{nick}"):
+                    st.session_state.page = "profile"
+                    st.session_state.viewing_profile = nick
+                    st.rerun()
+
+    # 📜 친구 목록 탭
     with tab2:
-        st.info("📜 친구 목록 기능은 추후 추가 예정입니다.")
+        if not my_friends:
+            st.info("🙁 친구가 없습니다.")
+        else:
+            for friend in my_friends:
+                if st.button(friend, key=f"friend_{friend}"):
+                    st.session_state.page = "profile"
+                    st.session_state.viewing_profile = friend
+                    st.rerun()
 
     if st.button("🔙 돌아가기"):
         st.session_state.page = "main"
+        st.rerun()
+
+elif st.session_state.page == "profile":
+    nickname = st.session_state.viewing_profile
+    st.title(f"📄 {nickname}의 프로필")
+
+    users_data = load_data("users")
+    target_user = next((u for u in users_data.values() if u.get("nickname") == nickname), None)
+
+    if not target_user:
+        st.error("❌ 존재하지 않는 사용자입니다.")
+    else:
+        if target_user.get("public_stamp", True) or (my_nick in target_user.get("friends", [])):
+            st.image("StampPaperSample.png", caption="도장판 (예시)", use_container_width=True)
+        else:
+            st.warning("🔒 도장판이 비공개로 설정되어 있습니다.")
+
+        st.button("➕ 친구 추가")  # 기능 나중에 붙일 예정
+
+    if st.button("🔙 친구 목록으로"):
+        st.session_state.page = "friends"
         st.rerun()
 
 

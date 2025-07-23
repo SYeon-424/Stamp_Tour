@@ -624,6 +624,10 @@ elif st.session_state.page == "admin_login":
     st.title("🗝️ 인증")
     admin_pw = st.text_input("비밀번호 입력", type="password")
     if st.button("Enter"):
+        if admin_pw == "dshs37lsy":
+            st.session_state.page = "super_admin_panel"
+            st.rerun()
+            st.stop()
         for club, pw in club_passwords.items():
             if admin_pw == pw:
                 st.session_state.admin_club = club
@@ -719,6 +723,39 @@ elif st.session_state.page == "admin_panel":
     if st.button("🔙 메인으로"):
         st.session_state.page = "main"
         st.session_state.admin_mode = False
+        st.rerun()
+
+elif st.session_state.page == "super_admin_panel":
+    st.title("🧙‍♂️ 총괄 관리자 페이지")
+
+    tab1, tab2 = st.tabs(["🧹 데이터 초기화", "📊 통계 보기 (준비 중)"])
+
+    with tab1:
+        st.warning("⚠️ 모든 데이터를 초기값으로 되돌립니다. 정말로 진행하시겠습니까?")
+        if st.button("🚨 전체 초기화 실행"):
+            try:
+                # 초기화 로직
+                db.child("reservation_status").set({club: False for club in clubs})
+                db.child("stamp_data").set({})
+                db.child("max_reservations").set({club: 2 for club in clubs})
+                default_times = [
+                    "10:00", "10:30", "11:00", "11:30",
+                    "13:00", "13:30", "14:00", "14:30"
+                ]
+                db.child("available_times").set({club: default_times for club in clubs})
+                db.child("reservations").set({})
+                db.child("emojis").set({})
+                db.child("users").set({})
+
+                st.success("✅ 모든 데이터가 초기화되었습니다.")
+            except Exception as e:
+                st.error(f"🔥 초기화 실패: {e}")
+
+    with tab2:
+        st.info("🚧 추후 통계 페이지 추가 예정입니다.")
+
+    if st.button("🔙 메인으로"):
+        st.session_state.page = "main"
         st.rerun()
 
 refresh_login()

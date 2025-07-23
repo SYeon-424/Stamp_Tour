@@ -354,9 +354,6 @@ elif st.session_state.page == "setting":
 
                 if updated:
                     msg_area.success("✅ 변경사항이 저장되었습니다.")
-                    time.sleep(1.5)
-                    st.session_state.page = "main"
-                    st.rerun()
 
     with tab2:
         st.subheader("🧑‍🤝‍🧑 친구 설정")

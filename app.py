@@ -353,10 +353,9 @@ elif st.session_state.page == "admin_panel":
             save_data("reservation_status", reservation_status)
             st.success(f"예약 기능이 {'활성화' if new_status else '비활성화'}되었습니다.")
 
-        if st.button("🔄 새로고침"):
-            st.rerun()
-
         if reservation_status.get(club, False):
+            if st.button("🔄 새로고침"):
+                st.rerun()
             st.markdown("#### 📋 예약 목록")
             club_reservations = reservations.get(club, [])
             if not club_reservations:

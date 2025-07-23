@@ -60,6 +60,12 @@ def initialize_firebase_data():
         db.child("stamp_data").set({})
     if not db.child("max_reservations").get().val():
         db.child("max_reservations").set({club: 2 for club in clubs})
+    if not db.child("available_times").get().val():
+        default_times = [
+            "10:00", "10:30", "11:00", "11:30",
+            "13:00", "13:30", "14:00", "14:30"
+        ]
+        db.child("available_times").set({club: default_times for club in clubs})
         
     try:
         existing = db.child("stamp_data").get().val()
@@ -265,10 +271,8 @@ elif st.session_state.page == "reservation_page":
         limit = max_reservations.get(club, 2)
         st.markdown(f"**시간당 최대 {limit}명까지 예약할 수 있습니다.**")
         
-        selected_time = st.selectbox("시간 선택", [
-            "10:00", "10:30", "11:00", "11:30",
-            "13:00", "13:30", "14:00", "14:30"
-        ])
+        available_times = load_data("available_times").get(club, [])
+        selected_time = st.selectbox("시간 선택", available_times)
 
         if st.button("✅ 예약"):
             max_reservations = load_data("max_reservations")
@@ -363,6 +367,25 @@ elif st.session_state.page == "admin_panel":
             else:
                 sorted_admin_reservations = sorted(club_reservations, key=lambda r: r["time"])
                 st.table([{ "시간": r["time"], "닉네임": r["nickname"], "전화번호": r["phone"] } for r in sorted_admin_reservations])
+            st.markdown("#### ⏰ 예약 시간 관리")
+            
+            available_times = load_data("available_times").get(club, [])
+            new_time = st.text_input("새로운 시간 추가 (예: 15:00)", key=f"{club}_new_time")
+            if st.button("➕ 시간 추가"):
+                if new_time and new_time not in available_times:
+                    available_times.append(new_time)
+                    available_times.sort()
+                    db.child("available_times").child(club).set(available_times)
+                    st.success("새로운 시간이 추가되었습니다.")
+                    st.rerun()
+                else:
+                    st.warning("시간이 비어있거나 이미 존재합니다.")
+            delete_time = st.selectbox("삭제할 시간 선택", available_times, key=f"{club}_del_time")
+            if st.button("🗑️ 시간 삭제"):
+                available_times.remove(delete_time)
+                db.child("available_times").child(club).set(available_times)
+                st.success("시간이 삭제되었습니다.")
+                st.rerun()
 
     if st.button("🔙 메인으로"):
         st.session_state.page = "main"

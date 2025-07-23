@@ -355,23 +355,51 @@ elif st.session_state.page == "profile":
     my_email_key = st.session_state.user_email.replace(".", "_")
     my_data = users_data.get(my_email_key, {})
     my_friends = my_data.get("friends", [])
+    emojis = load_data("emojis")
 
     target_user = next((u for u in users_data.values() if u.get("nickname") == nickname), None)
 
     if not target_user:
         st.error("❌ 존재하지 않는 사용자입니다.")
     else:
-        # 도장판 표시 여부 판단
         is_visible = target_user.get("public_stamp", True) or (my_nick in target_user.get("friends", []))
+        is_mutual_friend = (nickname in my_friends) and (my_nick in target_user.get("friends", []))
 
+        # 도장판 표시
         if is_visible:
             st.image("StampPaperSample.png", caption="도장판 (예시)", use_container_width=True)
         else:
             st.warning("🔒 도장판이 비공개로 설정되어 있습니다.")
 
-        # 친구추가 상태 확인 및 처리
+        # 🔹 이모지 표시 (공개 or 상호친구면 가능)
+        if is_visible:
+            st.markdown("### 📝 남긴 이모지들")
+            emoji_data = emojis.get(nickname, {})
+            if not emoji_data:
+                st.info("아직 아무도 이모지를 남기지 않았습니다.")
+            else:
+                for sender, emoji in emoji_data.items():
+                    st.markdown(f"- {sender}: {emoji}")
+
+        # 🔹 이모지 남기기 (상호 친구 + 도장판 볼 수 있을 때)
+        if is_mutual_friend and is_visible:
+            st.markdown("### 😎 이모지 남기기")
+            emoji_input = st.text_input("내가 남길 이모지 (한 글자)", max_chars=2, key="emoji_input")
+            if st.button("📌 이모지 남기기"):
+                if emoji_input.strip() == "":
+                    st.warning("이모지를 입력해주세요!")
+                else:
+                    if nickname not in emojis:
+                        emojis[nickname] = {}
+                    emojis[nickname][my_nick] = emoji_input
+                    save_data("emojis", emojis)
+                    st.success("이모지를 남겼습니다!")
+                    time.sleep(1)
+                    st.rerun()
+
+        # 친구 상태
         if nickname in my_friends:
-            st.info("✅ 이미 친구추가된 사용자입니다.")
+            st.info("✅ 이미 친구입니다.")
         else:
             if st.button("➕ 친구 추가"):
                 my_friends.append(nickname)
@@ -380,10 +408,9 @@ elif st.session_state.page == "profile":
                 time.sleep(1)
                 st.rerun()
 
-    if st.button("🔙 돌아가기"):
+    if st.button("🔙 친구 목록으로"):
         st.session_state.page = "friends"
         st.rerun()
-
 
 elif st.session_state.page == "setting":
     st.title("⚙️ 설정")

@@ -377,20 +377,22 @@ elif st.session_state.page == "profile":
                 for sender, emoji in emoji_data.items():
                     st.markdown(f"- {sender}: {emoji}")
 
+        ALLOWED_EMOJIS = ["💖", "🔥", "🌟", "👏", "😎", "😊", "🎉", "👍", "🤝"]
         if is_mutual_friend and is_visible:
             st.markdown("### 😎 방명록 남기기")
-            emoji_input = st.text_input("이모티콘을 입력해주세요 (한 글자)", max_chars=2, key="emoji_input")
-            if st.button("📌 보내기"):
-                if emoji_input.strip() == "":
-                    st.warning("공백은 기록할 수 없습니다.")
+            emoji_input = st.selectbox("이모티콘 선택", [""] + ALLOWED_EMOJIS, key="emoji_select")
+        
+            if st.button("📌 방명록 남기기"):
+                if emoji_input == "":
+                    st.warning("이모티콘을 선택해주세요!")
                 else:
                     if nickname not in emojis:
                         emojis[nickname] = {}
                     emojis[nickname][my_nick] = emoji_input
                     save_data("emojis", emojis)
-                    st.success("방명록을 남겼습니다!")
+                    st.success("방명록를 남겼습니다!")
                     time.sleep(1)
-                    st.rerun()
+                    st.rerun()ㅌ
 
         if nickname in my_friends:
             st.info("✅ 이미 친구추가된 사용자입니다.")

@@ -568,11 +568,11 @@ elif st.session_state.page == "setting":
                 updated = True
 
             if updated:
-                db.child("users").child(email_key).update({
-                    "public_stamp": public_checkbox,
-                    "searchable": search_checkbox
-                })
                 msg_area.success("✅ 변경사항이 저장되었습니다.")
+            db.child("users").child(email_key).update({
+                "public_stamp": public_checkbox,
+                "searchable": search_checkbox
+            })
 
     if st.button("🔙 돌아가기"):
         st.session_state.page = "main"

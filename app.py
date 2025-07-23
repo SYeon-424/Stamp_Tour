@@ -559,8 +559,22 @@ elif st.session_state.page == "setting":
 
     with tab2:
         st.subheader("🧑‍🤝‍🧑 친구 설정")
-        st.checkbox("📢 내 도장판 전체 공개", key="public_stamp", value=True)
-        st.checkbox("🔍 닉네임으로 나를 검색 가능하게 하기", key="searchable", value=True)
+        
+        email_key = st.session_state.user_email.replace(".", "_")
+        users_data = load_data("users")
+        user_data = users_data.get(email_key, {})
+    
+        public_default = user_data.get("public_stamp", True)
+        search_default = user_data.get("searchable", True)
+    
+        public_checkbox = st.checkbox("📢 내 도장판 전체 공개", value=public_default)
+        search_checkbox = st.checkbox("🔍 닉네임으로 나를 검색 가능하게 하기", value=search_default)
+        if st.button("✅ 저장"):
+            db.child("users").child(email_key).update({
+                "public_stamp": public_checkbox,
+                "searchable": search_checkbox
+            })
+
 
     if st.button("🔙 돌아가기"):
         st.session_state.page = "main"

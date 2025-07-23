@@ -364,7 +364,19 @@ elif st.session_state.page == "profile":
         is_mutual_friend = (nickname in my_friends) and (my_nick in target_user.get("friends", []))
 
         if is_visible:
-            st.image("StampPaperSample.png", caption="도장판 (예시)", use_container_width=True)
+            base = Image.open("StampPaperSample.png").convert("RGBA")
+            overlay = Image.new("RGBA", base.size, (255, 255, 255, 0))
+            user_stamps = stamp_data.get(st.session_state.nickname, {})
+            for club, stamped in user_stamps.items():
+                if stamped:
+                    try:
+                        stamp = Image.open(f"stamps/{club}.png").convert("RGBA")
+                        overlay = Image.alpha_composite(overlay, stamp)
+                    except Exception as e:
+                        print(f"⚠️ Stamp image not found for {club}: {e}")
+            result = Image.alpha_composite(base, overlay)
+            st.image(result, use_container_width=True)
+    
         else:
             st.warning("🔒 도장판이 비공개로 설정되어 있습니다.")
 

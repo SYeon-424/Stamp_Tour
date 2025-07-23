@@ -333,16 +333,21 @@ elif st.session_state.page == "edit_profile":
 
                 st.session_state.nickname = new_nick
                 msg_area.success("✅ 닉네임이 변경되었습니다.")
+                
+                time.sleep(2)
+                st.session_state.page = "main
+                st.rerun()
+
 
         if new_phone != current_phone:
             email_key = st.session_state.user_email.replace(".", "_")
             db.child("users").child(email_key).update({"phone": new_phone})
             st.session_state.phone = new_phone
             msg_area.success("✅ 전화번호가 변경되었습니다.")
-
-        time.sleep(2)
-        st.session_state.page = "main"
-        st.rerun()
+            
+            time.sleep(2)
+            st.session_state.page = "main
+            st.rerun()
 
     st.markdown("---")
     if st.button("🔙 메인으로"):

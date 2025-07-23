@@ -280,9 +280,12 @@ def show_stamp_board():
         st.session_state.page = "setting"
         st.rerun()
     if st.button("로그아웃"):
-        st.session_state.logged_in = False
+        for key in ["logged_in", "user_email", "nickname", "phone", "id_token", "refresh_token", "local_id", "page", "admin_mode", "admin_club", "viewing_profile"]:
+            if key in st.session_state:
+                del st.session_state[key]
         st.session_state.page = "main"
         st.rerun()
+
     st.markdown("---")
     if st.button("Staff only"):
         st.session_state.page = "admin_login"

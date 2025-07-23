@@ -360,6 +360,10 @@ elif st.session_state.page == "edit_profile":
                 time.sleep(1.5)
                 st.session_state.page = "main"
                 st.rerun()
+    st.markdown("---")
+    if st.button("🔙 메인으로"):
+        st.session_state.page = "main"
+        st.rerun()
 
 elif st.session_state.page == "admin_login":
     st.title("🗝️ 인증")

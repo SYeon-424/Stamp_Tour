@@ -216,8 +216,8 @@ def show_stamp_board():
 
         st.markdown("---")
 
-    if st.button("개인정보 수정"):
-        st.session_state.page = "edit_profile"
+    if st.button("⚙️ 설정"):
+        st.session_state.page = "setting"
         st.rerun()
     if st.button("로그아웃"):
         st.session_state.logged_in = False
@@ -299,69 +299,71 @@ elif st.session_state.page == "reservation_page":
         st.session_state.page = "main"
         st.rerun()
 
-elif st.session_state.page == "edit_profile":
-    st.title("✏️ 개인정보 수정")
+elif st.session_state.page == "settings":
+    st.title("⚙️ 설정")
+    tab1, tab2 = st.tabs(["👤 개인정보 수정", "🧑‍🤝‍🧑 친구 설정"])
 
-    current_nick = st.session_state.nickname
-    current_phone = st.session_state.phone
+    with tab1:
+        st.subheader("👤 개인정보 수정")
+        current_nick = st.session_state.nickname
+        current_phone = st.session_state.phone
 
-    new_nick = st.text_input("새 닉네임", value=current_nick, key="edit_nick")
-    new_phone = st.text_input("새 전화번호", value=current_phone, key="edit_phone")
+        new_nick = st.text_input("새 닉네임", value=current_nick, key="edit_nick")
+        new_phone = st.text_input("새 전화번호", value=current_phone, key="edit_phone")
+        msg_area = st.empty()
 
-    msg_area = st.empty()
+        if st.button("✅ 저장"):
+            updated = False
+            reservations = load_data("reservations")
 
-    if st.button("✅ 저장"):
-        updated = False
-        reservations = load_data("reservations")
-    
-        # 닉네임 유효성 검사
-        if any(c in new_nick for c in ".#$[]/ ") or new_nick.strip() == "":
-            msg_area.error("❌ 닉네임에 공백이나 '.', '#', '$', '[', ']', '/' 는 사용할 수 없습니다.")
-        else:
-            # ✅ 닉네임 변경
-            if new_nick != current_nick:
-                stamp_data = load_data("stamp_data")
-                if new_nick in stamp_data:
-                    msg_area.error("❌ 이미 존재하는 닉네임입니다.")
-                else:
-                    stamp_data[new_nick] = stamp_data.pop(current_nick)
-                    save_data("stamp_data", stamp_data)
-    
+            if any(c in new_nick for c in ".#$[]/ ") or new_nick.strip() == "":
+                msg_area.error("❌ 닉네임에 공백이나 '.', '#', '$', '[', ']', '/' 는 사용할 수 없습니다.")
+            else:
+                if new_nick != current_nick:
+                    stamp_data = load_data("stamp_data")
+                    if new_nick in stamp_data:
+                        msg_area.error("❌ 이미 존재하는 닉네임입니다.")
+                    else:
+                        stamp_data[new_nick] = stamp_data.pop(current_nick)
+                        save_data("stamp_data", stamp_data)
+
+                        for club, lst in reservations.items():
+                            for r in lst:
+                                if r["nickname"] == current_nick:
+                                    r["nickname"] = new_nick
+                        save_data("reservations", reservations)
+
+                        email_key = st.session_state.user_email.replace(".", "_")
+                        db.child("users").child(email_key).update({"nickname": new_nick})
+
+                        st.session_state.nickname = new_nick
+                        current_nick = new_nick
+                        updated = True
+
+                if new_phone != current_phone:
+                    email_key = st.session_state.user_email.replace(".", "_")
+                    db.child("users").child(email_key).update({"phone": new_phone})
+                    st.session_state.phone = new_phone
+                    current_phone = new_phone
                     for club, lst in reservations.items():
                         for r in lst:
                             if r["nickname"] == current_nick:
-                                r["nickname"] = new_nick
+                                r["phone"] = new_phone
                     save_data("reservations", reservations)
-    
-                    email_key = st.session_state.user_email.replace(".", "_")
-                    db.child("users").child(email_key).update({"nickname": new_nick})
-    
-                    st.session_state.nickname = new_nick
-                    current_nick = new_nick  # 업데이트된 이름 기준으로 다시 확인
                     updated = True
-    
-            # ✅ 전화번호 변경
-            if new_phone != current_phone:
-                email_key = st.session_state.user_email.replace(".", "_")
-                db.child("users").child(email_key).update({"phone": new_phone})
-                st.session_state.phone = new_phone
-                current_phone = new_phone
-                updated = True
-    
-                # 🔁 예약 목록 내 전화번호 업데이트
-                for club, lst in reservations.items():
-                    for r in lst:
-                        if r["nickname"] == current_nick:
-                            r["phone"] = new_phone
-                save_data("reservations", reservations)
-    
-            if updated:
-                msg_area.success("✅ 변경사항이 저장되었습니다.")
-                time.sleep(1.5)
-                st.session_state.page = "main"
-                st.rerun()
-    st.markdown("---")
-    if st.button("🔙 메인으로"):
+
+                if updated:
+                    msg_area.success("✅ 변경사항이 저장되었습니다.")
+                    time.sleep(1.5)
+                    st.session_state.page = "main"
+                    st.rerun()
+
+    with tab2:
+        st.subheader("🧑‍🤝‍🧑 친구 설정")
+        st.checkbox("📢 내 도장판 전체 공개", key="public_stamp", value=True)
+        st.checkbox("🔍 닉네임으로 나를 검색 가능하게 하기", key="searchable", value=True)
+
+    if st.button("🔙 돌아가기"):
         st.session_state.page = "main"
         st.rerun()
 

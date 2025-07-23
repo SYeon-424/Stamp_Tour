@@ -305,6 +305,14 @@ elif st.session_state.page == "reservation_page":
 
 elif st.session_state.page == "friends":
     st.title("👥 친구 관리")
+    
+    tab1, tab2 = st.tabs(["🌍 둘러보기", "📜 친구 목록"])
+
+    users_data = load_data("users")
+    my_nick = st.session_state.nickname
+    my_email_key = st.session_state.user_email.replace(".", "_")
+    my_data = users_data.get(my_email_key, {})
+    my_friends = my_data.get("friends", [])
 
     if my_data.get("pending_requests"):
         st.subheader("📬 친구 요청 수락")
@@ -341,14 +349,6 @@ elif st.session_state.page == "friends":
                     st.success(f"{requester}님을 친구로 추가했습니다.")
                     st.rerun()
 
-    
-    tab1, tab2 = st.tabs(["🌍 둘러보기", "📜 친구 목록"])
-
-    users_data = load_data("users")
-    my_nick = st.session_state.nickname
-    my_email_key = st.session_state.user_email.replace(".", "_")
-    my_data = users_data.get(my_email_key, {})
-    my_friends = my_data.get("friends", [])
 
     with tab1:
         st.subheader("닉네임 검색")

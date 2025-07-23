@@ -100,6 +100,7 @@ def refresh_login():
 class Login:
     def __init__(self):
         st.title("🔐 로그인")
+        st.subheader("로그인이 안되면 회원가입을 다시해주세요. 데이터 리셋기능 테스트로 데이터가 날아갔을 수 있습니다... :(")
 
         email = st.text_input("이메일", key="login_email")
         password = st.text_input("비밀번호", type="password", key="login_pw")

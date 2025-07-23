@@ -305,6 +305,43 @@ elif st.session_state.page == "reservation_page":
 
 elif st.session_state.page == "friends":
     st.title("👥 친구 관리")
+
+    if my_data.get("pending_requests"):
+        st.subheader("📬 친구 요청 수락")
+        for requester in my_data["pending_requests"]:
+            col1, col2 = st.columns([4, 1])
+            with col1:
+                st.write(f"👉 {requester}")
+            with col2:
+                if st.button("수락", key=f"accept_{requester}"):
+                # 서로 friends 목록에 추가
+                    if requester not in my_friends:
+                        my_friends.append(requester)
+                        db.child("users").child(my_email_key).update({"friends": my_friends})
+                
+                # 요청자도 내 닉네임을 친구 목록에 추가
+                    requester_email_key = next((k for k, v in users_data.items() if v.get("nickname") == requester), None)
+                    if requester_email_key:
+                        requester_data = users_data[requester_email_key]
+                        requester_friends = requester_data.get("friends", [])
+                        requester_friends.append(my_nick)
+                        db.child("users").child(requester_email_key).update({"friends": requester_friends})
+                    
+                    # 요청자 sent_requests에서 내 닉네임 제거
+                        requester_sent = requester_data.get("sent_requests", [])
+                        if my_nick in requester_sent:
+                            requester_sent.remove(my_nick)    
+                            db.child("users").child(requester_email_key).update({"sent_requests": requester_sent})
+    
+                # 내 pending_requests에서 제거
+                    my_pending = my_data.get("pending_requests", [])
+                    my_pending.remove(requester)
+                    db.child("users").child(my_email_key).update({"pending_requests": my_pending})
+
+                    st.success(f"{requester}님을 친구로 추가했습니다.")
+                    st.rerun()
+
+    
     tab1, tab2 = st.tabs(["🌍 둘러보기", "📜 친구 목록"])
 
     users_data = load_data("users")
@@ -420,12 +457,21 @@ elif st.session_state.page == "profile":
         if nickname in my_friends:
             st.info("✅ 이미 친구추가된 사용자입니다.")
         else:
-            if st.button("➕ 친구 추가"):
-                my_friends.append(nickname)
-                db.child("users").child(my_email_key).update({"friends": my_friends})
-                st.success("🎉 친구 추가 완료!")
-                time.sleep(1)
+            if st.button("➕ 친구 요청"):
+                if nickname not in my_data.get("sent_requests", []):
+                    my_sent = my_data.get("sent_requests", [])
+                    my_sent.append(nickname)
+                    db.child("users").child(my_email_key).update({"sent_requests": my_sent})
+                    target_email_key = next((k for k, v in users_data.items() if v.get("nickname") == nickname), None)
+                if target_email_key:
+                    target_pending = users_data[target_email_key].get("pending_requests", [])
+                    target_pending.append(my_nick)
+                    db.child("users").child(target_email_key).update({"pending_requests": target_pending})
+    
+                st.success("🎉 친구 요청을 보냈습니다!")
                 st.rerun()
+            else:
+                st.info("이미 친구 요청을 보낸 상태입니다.")
 
     if st.button("🔙 돌아가기"):
         st.session_state.page = "friends"

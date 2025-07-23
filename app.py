@@ -216,7 +216,7 @@ def show_stamp_board():
 
         st.markdown("---")
 
-    if st.button("✏️ 개인정보 수정"):
+    if st.button("개인정보 수정"):
         st.session_state.page = "edit_profile"
         st.rerun()
     if st.button("로그아웃"):

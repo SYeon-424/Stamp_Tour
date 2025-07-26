@@ -162,61 +162,6 @@ class Register:
 
 
 def show_stamp_board():
-    users_data = load_data("users")
-    my_nick = st.session_state.nickname
-    my_email_key = st.session_state.user_email.replace(".", "_")
-    my_data = users_data.get(my_email_key, {})
-    my_friends = my_data.get("friends", [])
-
-    if my_data.get("pending_requests"):
-        st.subheader("📬 친구 요청 수락")
-        for requester in my_data["pending_requests"]:
-            col1, col2, col3 = st.columns([3, 1, 1])
-            with col1:
-                st.write(f"👉 {requester}")
-            with col2:
-                if st.button("수락", key=f"accept_{requester}"):
-                    if requester not in my_friends:
-                        my_friends.append(requester)
-                        db.child("users").child(my_email_key).update({"friends": my_friends})
-    
-                    requester_email_key = next((k for k, v in users_data.items() if v.get("nickname") == requester), None)
-                    if requester_email_key:
-                        requester_data = users_data[requester_email_key]
-                        requester_friends = requester_data.get("friends", [])
-                        if my_nick not in requester_friends:
-                            requester_friends.append(my_nick)
-                            db.child("users").child(requester_email_key).update({"friends": requester_friends})
-    
-                        requester_sent = requester_data.get("sent_requests", [])
-                        if my_nick in requester_sent:
-                            requester_sent.remove(my_nick)
-                            db.child("users").child(requester_email_key).update({"sent_requests": requester_sent})
-    
-                    my_pending = my_data.get("pending_requests", [])
-                    my_pending.remove(requester)
-                    db.child("users").child(my_email_key).update({"pending_requests": my_pending})
-    
-                    st.success(f"{requester}님을 친구로 추가했습니다.")
-                    st.rerun()
-    
-            with col3:
-                if st.button("거절", key=f"reject_{requester}"):
-                    my_pending = my_data.get("pending_requests", [])
-                    if requester in my_pending:
-                        my_pending.remove(requester)
-                        db.child("users").child(my_email_key).update({"pending_requests": my_pending})
-                    requester_email_key = next((k for k, v in users_data.items() if v.get("nickname") == requester), None)
-                    if requester_email_key:
-                        requester_data = users_data[requester_email_key]
-                        requester_sent = requester_data.get("sent_requests", [])
-                        if my_nick in requester_sent:
-                            requester_sent.remove(my_nick)
-                            db.child("users").child(requester_email_key).update({"sent_requests": requester_sent})
-                    st.info(f"{requester}님의 친구 요청을 거절했습니다.")
-                    st.rerun()
-
-
     st.title("🎯 도장판")
     st.write(f"닉네임: {st.session_state.nickname}")
 
@@ -364,40 +309,29 @@ elif st.session_state.page == "reservation_page":
 
 elif st.session_state.page == "friends":
     st.title("👥 친구 관리")
-    
-    tab1, tab2, tab3, tab4 = st.tabs(["🌍 둘러보기", "📜 친구 목록", "🏆 도장판 완성 순위", "🏆 방명록 순위"])
+
+    tab1, tab2, tab3, tab4 = st.tabs(["👤 내 프로필", "🌍 둘러보기", "🏆 도장판 완성 순위", "🏆 방명록 순위"])
 
     users_data = load_data("users")
     my_nick = st.session_state.nickname
     my_email_key = st.session_state.user_email.replace(".", "_")
-    my_data = users_data.get(my_email_key, {})
-    my_friends = my_data.get("friends", [])
-    with tab1:
-        st.subheader("닉네임 검색")
-        query = st.text_input("닉네임 입력")
 
-        if query:
-            matched = [
-                user["nickname"] for user in users_data.values()
-                if query.lower() in user["nickname"].lower()
-                and user.get("searchable", True)
-                and user["nickname"] != my_nick
-            ]
-            for nick in matched:
-                if st.button(nick, key=f"search_{nick}"):
-                    st.session_state.page = "profile"
-                    st.session_state.viewing_profile = nick
-                    st.rerun()
+    with tab1:
+        st.session_state.viewing_profile = my_nick
+        st.session_state.page = "profile"
+        st.rerun()
 
     with tab2:
-        if not my_friends:
-            st.info("🙁 아직 친구가 없습니다.")
-        else:
-            for friend in my_friends:
-                if st.button(friend, key=f"friend_{friend}"):
-                    st.session_state.page = "profile"
-                    st.session_state.viewing_profile = friend
-                    st.rerun()
+        st.subheader("닉네임 검색")
+        query = st.text_input("닉네임 입력")
+        matched = [user["nickname"] for user in users_data.values()
+                   if user.get("searchable", True) and user["nickname"] != my_nick and (not query or query.lower() in user["nickname"].lower())]
+
+        for nick in matched:
+            if st.button(nick, key=f"search_{nick}"):
+                st.session_state.viewing_profile = nick
+                st.session_state.page = "profile"
+                st.rerun()
 
     with tab3:
         st.subheader("🏆 도장판 완성 순위")
@@ -446,6 +380,7 @@ elif st.session_state.page == "friends":
                 with col2:
                     st.markdown(f"**{count}개**")
 
+    st.markdown("---")
     if st.button("🔙 메인으로"):
         st.session_state.page = "main"
         st.rerun()
@@ -455,10 +390,6 @@ elif st.session_state.page == "profile":
     st.title(f"📄 {nickname}의 프로필")
 
     users_data = load_data("users")
-    my_nick = st.session_state.nickname
-    my_email_key = st.session_state.user_email.replace(".", "_")
-    my_data = users_data.get(my_email_key, {})
-    my_friends = my_data.get("friends", [])
     emojis = load_data("emojis")
     stamp_data = load_data("stamp_data")
 
@@ -467,8 +398,7 @@ elif st.session_state.page == "profile":
     if not target_user:
         st.error("❌ 존재하지 않는 사용자입니다.")
     else:
-        is_visible = target_user.get("public_stamp", True) or (my_nick in target_user.get("friends", []))
-        is_mutual_friend = (nickname in my_friends) and (my_nick in target_user.get("friends", []))
+        is_visible = target_user.get("public_stamp", True)
 
         if is_visible:
             base = Image.open("StampPaperSample.png").convert("RGBA")
@@ -479,15 +409,11 @@ elif st.session_state.page == "profile":
                     try:
                         stamp = Image.open(f"stamps/{club}.png").convert("RGBA")
                         overlay = Image.alpha_composite(overlay, stamp)
-                    except Exception as e:
-                        print(f"⚠️ Stamp image not found for {club}: {e}")
+                    except:
+                        pass
             result = Image.alpha_composite(base, overlay)
             st.image(result, use_container_width=True)
-    
-        else:
-            st.warning("🔒 도장판이 비공개로 설정되어 있습니다.")
 
-        if is_visible:
             st.markdown("방명록")
             emoji_data = emojis.get(nickname, {})
             if not emoji_data:
@@ -498,7 +424,7 @@ elif st.session_state.page == "profile":
                     with col1:
                         st.markdown(f"- **{sender}**: {emoji}")
                     with col2:
-                        if sender == my_nick:
+                        if sender == st.session_state.nickname:
                             if st.button("❌ 삭제", key=f"del_emoji_{sender}"):
                                 del emojis[nickname][sender]
                                 save_data("emojis", emojis)
@@ -506,41 +432,23 @@ elif st.session_state.page == "profile":
                                 time.sleep(1)
                                 st.rerun()
 
-        ALLOWED_EMOJIS = ["❤️", "💕", "❤️‍🔥", "💯", "🔥", "🌟", "👏", "😎", "😊", "🙃", "🎉", "👍", "🤝"]
-        if is_mutual_friend and is_visible:
             st.markdown("### 😎 방명록 남기기")
+            ALLOWED_EMOJIS = ["❤️", "💕", "❤️‍🔥", "💯", "🔥", "🌟", "👏", "😎", "😊", "🙃", "🎉", "👍", "🤝"]
             emoji_input = st.selectbox("이모티콘 선택", [""] + ALLOWED_EMOJIS, key="emoji_select")
-        
             if st.button("📌 방명록 남기기"):
                 if emoji_input == "":
                     st.warning("이모티콘을 선택해주세요!")
                 else:
                     if nickname not in emojis:
                         emojis[nickname] = {}
-                    emojis[nickname][my_nick] = emoji_input
+                    emojis[nickname][st.session_state.nickname] = emoji_input
                     save_data("emojis", emojis)
                     st.success("방명록을 남겼습니다!")
                     time.sleep(1)
                     st.rerun()
 
-        if nickname in my_friends:
-            st.info("✅ 이미 친구추가된 사용자입니다.")
         else:
-            if st.button("➕ 친구 요청"):
-                if nickname not in my_data.get("sent_requests", []):
-                    my_sent = my_data.get("sent_requests", [])
-                    my_sent.append(nickname)
-                    db.child("users").child(my_email_key).update({"sent_requests": my_sent})
-                    target_email_key = next((k for k, v in users_data.items() if v.get("nickname") == nickname), None)
-                if target_email_key:
-                    target_pending = users_data[target_email_key].get("pending_requests", [])
-                    target_pending.append(my_nick)
-                    db.child("users").child(target_email_key).update({"pending_requests": target_pending})
-    
-                st.success("🎉 친구 요청을 보냈습니다!")
-                st.rerun()
-            else:
-                st.info("이미 친구 요청을 보낸 상태입니다.")
+            st.warning("🔒 도장판이 비공개로 설정되어 있습니다.")
 
     if st.button("🔙 돌아가기"):
         st.session_state.page = "friends"

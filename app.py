@@ -317,9 +317,42 @@ elif st.session_state.page == "friends":
     my_email_key = st.session_state.user_email.replace(".", "_")
 
     with tab1:
-        st.session_state.viewing_profile = my_nick
-        st.session_state.page = "profile"
-        st.rerun()
+        st.subheader(f"📄 {my_nick}의 도장판")
+    
+        # 도장판 이미지 출력
+        base = Image.open("StampPaperSample.png").convert("RGBA")
+        overlay = Image.new("RGBA", base.size, (255, 255, 255, 0))
+        user_stamps = load_data("stamp_data").get(my_nick, {})
+        for club, stamped in user_stamps.items():
+            if stamped:
+                try:
+                    stamp = Image.open(f"stamps/{club}.png").convert("RGBA")
+                    overlay = Image.alpha_composite(overlay, stamp)
+                except:
+                    pass
+        result = Image.alpha_composite(base, overlay)
+        st.image(result, use_container_width=True)
+    
+        # 방명록 출력
+        st.markdown("### 💬 내 방명록")
+        emojis = load_data("emojis")
+        my_emojis = emojis.get(my_nick, {})
+    
+        if not my_emojis:
+            st.info("아직 아무도 방명록을 남기지 않았습니다.")
+        else:
+            for sender, emoji in my_emojis.items():
+                col1, col2 = st.columns([4, 1])
+                with col1:
+                    st.markdown(f"- **{sender}**: {emoji}")
+                with col2:
+                    if sender == my_nick:
+                        if st.button("❌ 삭제", key=f"del_emoji_self_{sender}"):
+                            del emojis[my_nick][sender]
+                            save_data("emojis", emojis)
+                            st.success("방명록이 삭제되었습니다.")
+                            time.sleep(1)
+                            st.rerun()
 
     with tab2:
         st.subheader("닉네임 검색")
